@@ -9,7 +9,8 @@ Phase 3 done too: all 257 library objects are identical, and with assembly stand
 game the link reproduces the original's headers, `.text` and `.data`. Phase 4 done too: all five
 game files are C++ and AK.COF rebuilds identical, symbol table and line numbers included. Phase
 7 done: a Python port of WDOSX's own packer re-wraps it, and AK.EXE rebuilds identical (sha1
-756637c8...). Next are phases 5 and 6. docs/HANDOFF.md has the results.** This plan is based on the sister projects
+756637c8...). Phase 5 done and phase 6 written up (docs/game/, FORMATS.md, FINDINGS.md); checking
+the findings in play is next. docs/HANDOFF.md has the results.** This plan is based on the sister projects
 `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` (their README, docs/HANDOFF.md,
 FINDINGS.md, MATCHING.md and U3's PLAN.md), on `../u6md-decompiled/U6-LESSONS_DECOMPILATION.md`,
 and on a first look at the GOG files in `gamedata/`. The goal is the same as theirs: source that

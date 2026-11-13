@@ -13,6 +13,11 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
 | SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | not a target |
 
+The source has readable names and named constants (`src/akdefs.h`, phase 5). How the game works
+is written up in docs/game/ (phase 6), the bugs in docs/FINDINGS.md, the save file and AK.DAT in
+docs/FORMATS.md. `python tools/akmap.py world LUCKY` prints the world map a lucky number makes
+(also `stats` and `dungeon`).
+
 The plan is docs/PLAN.md; the current state and next steps are in docs/HANDOFF.md.
 
 ## Tools

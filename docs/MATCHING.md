@@ -222,3 +222,20 @@ built by `tools/buildalleg.py` and the stand-ins, reproduced AK.COF's headers, `
 exactly (`tools/build.py`). With the five game files in C++ (phase 4) the whole file is identical,
 symbol table and line numbers included. The game objects must therefore keep their exact sizes. Each ends on
 a 4-byte boundary, and ld places objects back to back.
+
+## The readable pass (proven in phase 5)
+
+What changed in phase 5 without changing a byte (`tools/build.py` identical after each step):
+- **`#define` constants** in a new header (`src/akdefs.h`), included by all five files, by ak.cc
+  on what was its blank line 14. A header of `#define`s adds no code, no labels and no debug
+  symbols, so the include itself is free; and a macro expands to the very token it replaced.
+- **Renaming locals, parameters and user labels** in the four files without `-g` (akworld.cc's
+  `l` to `dist`, `mn` to `target`, the label `attack:` to `strike:` and so on): gcc numbers its
+  labels `Ln` whatever the source calls them, and frame slots follow declaration order, not
+  names.
+- **A char literal for an int literal** in a comparison: `q < '1' | q > '4'` and `q - '0'`
+  compile like `q < 49 | q > 52` and `q - 48`.
+- **Comments anywhere** in the four files and in the headers, and **within a line** in ak.cc
+  (each definition line there got its address as a trailing comment).
+- **Member comments in the class headers**, though ak.cc's debug information records the
+  classes: it records names, types and order, not lines.

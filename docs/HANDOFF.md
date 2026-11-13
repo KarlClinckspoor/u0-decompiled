@@ -2,13 +2,14 @@
 
 State as of 2026-11-13. Read this first, then docs/MATCHING.md (how to change the source
 without breaking the match), docs/MAP.md (what is in AK.EXE) and docs/FINDINGS.md (what the
-code revealed). docs/PLAN.md is the original plan, phases 0-8.
+code revealed), docs/game/ (how the game works) and docs/FORMATS.md (PLAYER.U0, AK.DAT).
+docs/PLAN.md is the original plan, phases 0-8.
 
 ## Where it stands
 
 **AK.EXE rebuilds identical to the GOG file, byte for byte** (238962 bytes, sha1
 `756637c80622b84b8167f8bc4192e221ac50187d`), from:
-- the game in C++ (`src/`, five files, 36 functions);
+- the game in C++ (`src/`, five files, 36 functions, with readable names and named constants);
 - Allegro 2.2, rebuilt from its source as the game's copy was built;
 - DJGPP 2.01's libc, libgcc, libg++ 2.7.1's libiostr and crt0, linked as shipped;
 - the WDOSX 0.97 kernel and stub, copied from gamedata at build time.
@@ -24,8 +25,8 @@ information and the 316 line numbers. The compiler is gcc 2.7.2.1 for DJGPP at `
 | 3 libraries, link | done: all 257 library objects identical, the link reproduces the layout |
 | 4 the game in C++ | done: akmenu, akaux, akchar, ak (with `-g`), akworld all match, symbols included |
 | 7 the shipped file | done: `tools/postlink.py` with a Python port of WDOSX's packer |
-| 5 readable pass | **open** |
-| 6 mechanics, findings checked in play | **open** (findings so far are read from the code only) |
+| 5 readable pass | done: `src/akdefs.h` names every map value, monster, item, stat, colour, key, result and menu entry; akworld.cc's locals renamed; every function commented with its address |
+| 6 mechanics, findings checked in play | written: docs/game/ (the rules), docs/FORMATS.md, docs/FINDINGS.md (17 bugs, with status); `tools/akmap.py` reproduces the generators. **Open: checking in play** (nothing is marked "played" yet) and the Apple II comparison |
 | 8 port | optional, not started |
 
 SETUP.EXE (Allegro's stock sound setup, same wrapper) is **not a target**: Karl decided it
@@ -82,6 +83,7 @@ function, every symbol, and for ak.cc every debug symbol and line number.
 | `src/akchar.cc`, `akchar.h` | character creation, the shop, save/load (PLAYER.U0), Lord British, upkeep, death |
 | `src/akmenu.cc`, `akmenu.h` | the main menu |
 | `src/akaux.cc`, `akaux.h`, `ak.h` | intro, instructions, quotes, credits; `ak.h` holds AK.DAT's object indexes |
+| `src/akdefs.h` | phase 5's named constants (`LAND_*`, `DG_*`, `MON_*`, `IT_*`, `ST_*`, `CLR_*`, keys, `GAME_*`, `MENU_*`): `#define`s only, included by every file |
 | `tools/build.py` | the whole build and every comparison (above) |
 | `tools/gxx.py` | compile one file in DOSBox and compare it function by function, symbols and debug info included |
 | `tools/postlink.py`, `tools/wpack.py` | phase 7: the WFSE entry, as WDOSX 0.97's `addfile.asm` writes it; WDOSX-Pack 1.07 ported from `wpack.c` |
@@ -92,9 +94,10 @@ function, every symbol, and for ak.cc every debug symbol and line number.
 | `tools/setup.py`, `tools/dos.py` | the toolchain in `build/tc`; the headless DOSBox runner (long lines via `@response` files) |
 | `tools/buildalleg.py`, `tools/libmatch.py` | Allegro 2.2's build; library objects paired by symbol and compared |
 | `tools/akdat.py` | AK.DAT reader (`list`, `extract` to `build/akdat`) |
+| `tools/akmap.py` | the game's generators in Python: `stats LUCKY`, `world LUCKY`, `dungeon LUCKY LEVEL [X Y]`; DJGPP's `random()` checked against the real libc |
 | `tools/standin.py` | phase 3's generator of assembly stand-ins; `build.py` still falls back to `src/standin/NAME.s` when a `src/NAME.cc` is missing |
 | `tools/exediff.py`, `fat12.py` | copied from u1, unused |
-| `docs/` | PLAN, MAP, MATCHING, FINDINGS, this file |
+| `docs/` | PLAN, MAP, MATCHING, FINDINGS, FORMATS, this file; `docs/game/` the rules of the game |
 
 Git: branch `master`, pushed to github.com/KarlClinckspoor/u0-decompiled (each push so far was
 on Karl's word). Ignored: `gamedata/`, `build/`, the archives in `tools/`, `tools/u1/`.
@@ -128,30 +131,36 @@ docs/MATCHING.md has the details and evidence.
     statements (`if (...) ; else`).
 - **Named constants**: `#define` is free as long as value and type stay the same. A new
   `enum` or type in a header that ak.cc includes would add debug symbols and break the match.
-  Put such types in a separate header that ak.cc does not include.
+  Put such types in a separate header that ak.cc does not include. `src/akdefs.h` holds them;
+  ak.cc includes it on what was a blank line (14), so no statement moved. Avoid the prefixes
+  `C_`, `K_` and `T_` (DJGPP's coff.h and keys headers) and `D_` (Allegro's GUI flags).
+- **The phase 5 pass was done by scoped, count-checked substitutions** (a one-off script: each
+  rename limited to one function, string and char literals left alone, the expected number of
+  hits asserted), then `tools/build.py`. Watch inline comments: a rename can leak into them.
 
 ## Open work
 
-1. **Phase 5, readable pass.**
-   - akworld.cc has no debug info, so its locals' and parameters' names are guesses (mostly the
-     Apple BASIC's: `x`, `w`, `cent`, `l1`, `mn`, `dam`...).
-   - Map values (world: 1 mountains, 2 tree, 3 town, 4 dungeon, 5 castle; dungeon: 1 wall,
-     2 trap, 3 hidden door, 4 door, 5 chest, 7/9 ladder down, 8 ladder up, monster * 10), the
-     key codes and the colours could become named constants.
-   - Every function has a comment; some say "probably". The Apple II Applesoft listing would
-     confirm the names and the meaning of variables (Corey Roth ported it closely).
-2. **Phase 6, mechanics.**
-   - Write docs/game/ from docs/FINDINGS.md (world and dungeon generation, combat, the amulet,
-     quests, food, the save file, AK.DAT texts).
-   - Check the findings in play: GOG's DOSBox with AK.EXE. Mark each "checked in play" or
-     "read only". The bugs (towns never thinned, uninitialised `itoa` buffers, the mistyped
-     range check, mages buying rapiers and bows) are good first checks.
-   - Compare with the Apple II original where it differs (random numbers, the generators,
-     rounding).
+1. **Phase 6, check the findings in play** (GOG's DOSBox with AK.EXE; send real key presses).
+   Mark each item of docs/FINDINGS.md "played", or correct it, and drop the "not yet checked"
+   notes in docs/game/ as pages are confirmed. Good first checks, cheapest first:
+   - FINDINGS 4, the credits run to their end (Acknowledgements, no key): garbage or a crash?
+   - a lucky number's stat offers and world map against `tools/akmap.py stats/world LUCKY`
+     (1234 is worked through in docs/game/world.md), then level 1 and 2 of a dungeon;
+   - FINDINGS 1 (a mage buys a bow), 2 (a bow shot facing "East" always misses), 3 (shooting
+     through a wall), 16 (falling into a wall);
+   - chests and monsters coming back after a ladder trip; the stat gain on castle visits after
+     the balrog (needs a long game or an edited PLAYER.U0: docs/FORMATS.md has the layout,
+     `task` = -10 at offset 112).
+   An edited PLAYER.U0 is the quick way to set up most checks.
+2. **Compare with the Apple II original** where it differs (the seeding of `RND`, the
+   generators, the formulas, rounding). Needs the Applesoft listing: ask Karl before
+   downloading it, and keep it out of git.
 3. Optional: build the WDOSX kernel and stub from WDOSX's sources (`kernel/wdosx.asm`,
    `coff/stubcf.asm`; needs TASM) instead of copying them. They carry the 1996-2002 copyright,
    and the archived sources are the 2005 final, so they may differ.
-4. Optional, phase 8: a port against a modern Allegro or SDL shim.
+4. Optional, phase 8: a port against a modern Allegro or SDL shim. `src/akdefs.h` and
+   docs/game/ are the starting points; delay loops (`rest`) and Allegro 2.2's `readkey` codes
+   (Alt+arrows 155/157/160) are the parts to look at first.
 
 ## Facts worth knowing
 
