@@ -94,10 +94,21 @@ Source names must be given in lower case (`foo.cc` is C++; `FOO.CC` is taken for
   then loads it.
 - A header's `extern inline` function that is used (allegro.h's `textout(..., char *, ...)`) is
   emitted as a local copy at the end of the object.
+- `x % 8 == 0` and `(x & 7) == 0` both become an `and`, but differently: `% 8` copies the value
+  first (`mov edx,eax; and edx,7; test edx,edx`), `& 7` works in place (`and eax,7; test eax,eax`).
+  akaux.cc's scrollers use `% 8`. Likewise `readkey() & 0xff` gives `movzx esi,al`.
+- A local array with an initialiser (`char *quote[] = {...}`) is copied at entry from a table in
+  `.text` placed before the function (`lea edi,[frame]; mov esi,LCn; cld; mov ecx,N; rep movsd`).
+  The table's words point at the strings' `LC` labels; identical strings share one literal.
+  Entries missing from a sized array are zero (akaux.cc's credits end in a 0 word).
 - **Labels are numbered across the whole file, headers included.** The order of `#include`s
   shows in the label numbers even when the code is identical: akmenu.cc needs `<fstream.h>`
   before `<allegro.h>` to get the original's numbers (L332 for the textout copy, L455 on in the
-  game's code). `tools/gxx.py` compares the symbols when a file is a whole object.
+  game's code). akaux.cc on the other hand includes no iostream header before allegro.h (its
+  textout copy is L51). `tools/gxx.py` compares the symbols when a file is a whole object.
+- Calls to the object's own inline copies are pc-relative without relocation, so any size
+  difference earlier in the file changes all of them. `gxx.py` compares such calls by the name
+  of their target, which keeps the reported first difference the real one.
 - A `switch` with a jump table is `cmp [ebp-N],max; ja default; mov r,[ebp-N];
   mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`. The table (absolute addresses of the cases)
   sits in `.text` right after the `jmp`, aligned to 4.

@@ -2,8 +2,8 @@
 
 State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
 `.text` and `.data` identical to the original**, from the real libraries and assembly
-stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc matches
-completely, symbols included. Read this first, then
+stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc and
+akaux.cc match completely, symbols included. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -76,7 +76,8 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | object | state |
 |---|---|
 | akmenu.cc | **done**: `src/akmenu.cc` + `src/akmenu.h`. All 5 functions and the inline textout copy match, and all 53 symbols (label numbers included) are the original's. Stand-in deleted. The link stays identical |
-| akaux.cc, akchar.cc, ak.cc, akworld.cc | stand-ins |
+| akaux.cc | **done**: `src/akaux.cc` + `src/akaux.h` + `src/ak.h` (AK.DAT's object indexes). All 6 functions, the quote and credit tables, the two inline copies and all 158 symbols match. Stand-in deleted |
+| akchar.cc, ak.cc, akworld.cc | stand-ins (regenerated: local pointer tables are now relocations too) |
 
 `python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
 names, strings and switch tables. `tools/gxx.py src/NAME.cc` compares functions, and also
@@ -190,7 +191,7 @@ python tools/libmatch.py --quiet # all library objects identical
 python tools/build.py            # SECTIONS IDENTICAL to the original COFF
 ```
 
-1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc (done), akaux.cc (5 KB), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
+1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc and akaux.cc (done), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
    fix the source's line layout), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB).
    - Loop per function: `tools/gxx.py src/akmenu.cc`.
    - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the

@@ -93,6 +93,12 @@ def compare(objpath, ak, verbose=False):
                     and not s.name.startswith('.') and s.name not in coff.MARKERS),
                    key=lambda s: s.value)
     bynames = {s.name: s for s in ak.syms if s.sclass in (2, 3, 6) and s.sec == 1}
+    localnames = {s.value: s.name for s in o.syms if s.sclass in (2, 3, 6) and s.sec == 1
+                  and not s.name.startswith(('.', 'L'))}
+    aknames = {}
+    for s in ak.syms:
+        if s.sclass in (2, 3, 6) and s.sec == 1 and not s.name.startswith(('.', 'L')):
+            aknames.setdefault(s.value, s.name)
     ok = True
     for k, s in enumerate(funcs):
         start = s.value
@@ -105,7 +111,21 @@ def compare(objpath, ak, verbose=False):
             ok = False
             continue
         orig = ak.read(ref.value, len(mine))
-        diff = [i for i in range(len(mine)) if (start + i) not in mask and mine[i] != orig[i]]
+        # calls inside the object (to its inline copies) carry no relocation: compare them by
+        # the name of the function they reach, so a size change elsewhere does not hide the
+        # real first difference
+        same_target = set()
+        if _md is not None:
+            for x in _md.disasm(mine, 0):
+                if x.bytes[0] == 0xE8 and x.size == 5 and (start + x.address + 1) not in mask:
+                    t_mine = start + x.address + 5 + int.from_bytes(x.bytes[1:5], 'little', signed=True)
+                    t_orig = ref.value + x.address + 5 + int.from_bytes(orig[x.address + 1:x.address + 5], 'little', signed=True)
+                    n_mine = localnames.get(t_mine)
+                    n_orig = aknames.get(t_orig)
+                    if n_mine is not None and n_mine == n_orig:
+                        same_target.update(range(x.address + 1, x.address + 5))
+        diff = [i for i in range(len(mine)) if (start + i) not in mask and i not in same_target
+                and mine[i] != orig[i]]
         if not diff:
             print('  MATCH    %-50s %d bytes' % (label, len(mine)))
             continue

@@ -141,6 +141,34 @@ class Gen:
                 if capstone.CS_GRP_RET in g or insn.mnemonic in ('ret', 'iret', 'hlt'):
                     break
                 pc += insn.size
+        self.pointer_tables()
+
+    def pointer_tables(self):
+        """Initialisers of local pointer arrays (akaux.cc's quotes) sit in .text as words that
+        point at the object's own literals (LC labels). A run of at least two such aligned words
+        outside the code is taken for one, and each word becomes a relocation."""
+        covered = set()
+        for a, i in self.code.items():
+            covered.update(range(a, a + i.size))
+        lits = {v for v, s in self.own.items() if s.name.startswith('LC')}
+        t = self.a
+        while t + 4 <= self.b:
+            run = []
+            u = t
+            while u + 4 <= self.b and not covered.intersection(range(u, u + 4)) and u not in self.tables:
+                e = int.from_bytes(self.ak.read(u, 4), 'little')
+                if e not in lits and not (e == 0 and run):
+                    break
+                run.append((u, e))
+                u += 4
+            if sum(1 for _, e in run if e) >= 2:
+                for u, e in run:
+                    if e:
+                        self.relocs[u] = ('abs', e)
+                    self.tables.add(u)
+                t = u
+            else:
+                t += 4 if run else 1
 
     def label(self, v):
         s = self.own.get(v)
