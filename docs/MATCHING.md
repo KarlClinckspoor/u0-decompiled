@@ -101,6 +101,41 @@ Source names must be given in lower case (`foo.cc` is C++; `FOO.CC` is taken for
   `.text` placed before the function (`lea edi,[frame]; mov esi,LCn; cld; mov ecx,N; rep movsd`).
   The table's words point at the strings' `LC` labels; identical strings share one literal.
   Entries missing from a sized array are zero (akaux.cc's credits end in a 0 word).
+- An assignment inside a condition stores and reloads: `if ((f = fopen(...)) == NULL)` gives
+  `mov [f],eax; mov eax,[f]; test eax,eax`, while `if (f == NULL)` after a separate assignment
+  gives `cmp [f],0`. Same for `while ((line = strsep(rest, ";")) != NULL)`.
+- Identical aggregate initialisers share one table: akchar.cc's `charcreate()` and `shop()` both
+  copy their `char *stat[]` from the same `LC6` (gcc hashes constants).
+- Block-local variables get stack slots that are freed at the end of the block and reused by a
+  later block, last-freed first: in `lb()` the third block must declare `text` before `rest` to
+  get the slots the original has.
+- `while`, `do` and `for` start with `emit_nop()`, which emits a `nop` at -O0 only when the last
+  instruction is a label. Two labels before a loop's `nop` therefore mean a user label: akchar.cc's
+  `shop()` has `again:` before its `while`, and `default:` does `goto again;` (a `continue` would
+  jump past the `nop`).
+
+### Dead jumps at the end of a function
+
+Some functions end, after their last statement, with one or two dead `jmp`s to the epilogue, each
+on its own 4-aligned slot (`eb 06 89 f6 eb 02 89 f6`). They come from gcc's C++ front end
+(`finish_function` in cp/decl.c, read in gcc2721s.zip): when the function has a return label and
+no recorded return value, it emits `goto no_return_label` and then `jump return_label`. So:
+- a function ending with `return N;` gets its own jump plus two dead ones;
+- a function falling off its end gets one live and one dead jump;
+- otherwise there are none.
+
+"No recorded return value" is the global `current_function_return_value`. gcc sets it when a
+`return` returns a declaration outside any condition, loop or switch: a constructor's implicit
+`return this`, or a return through a temporary when destructors are pending (akmenu.cc's
+`runmenu`). It clears it at user labels and `case` labels, and **never resets it between
+functions**. The dead jumps therefore depend on the functions before, in file order:
+- in akchar.cc the constructor sets it, so `charcreate()` gets none;
+- `shop()`'s `switch` clears it, so `shop()` and everything after get them;
+- in akmenu.cc `runmenu()` sets it again, so `draw()` and `redraw()` get none.
+
+Compile whole files in their original order; a one-function probe can show a difference that
+the full file does not have.
+
 - **Labels are numbered across the whole file, headers included.** The order of `#include`s
   shows in the label numbers even when the code is identical: akmenu.cc needs `<fstream.h>`
   before `<allegro.h>` to get the original's numbers (L332 for the textout copy, L455 on in the

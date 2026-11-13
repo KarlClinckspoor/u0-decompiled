@@ -2,8 +2,8 @@
 
 State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
 `.text` and `.data` identical to the original**, from the real libraries and assembly
-stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc and
-akaux.cc match completely, symbols included. Read this first, then
+stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc,
+akaux.cc and akchar.cc match completely, symbols included. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -77,7 +77,8 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 |---|---|
 | akmenu.cc | **done**: `src/akmenu.cc` + `src/akmenu.h`. All 5 functions and the inline textout copy match, and all 53 symbols (label numbers included) are the original's. Stand-in deleted. The link stays identical |
 | akaux.cc | **done**: `src/akaux.cc` + `src/akaux.h` + `src/ak.h` (AK.DAT's object indexes). All 6 functions, the quote and credit tables, the two inline copies and all 158 symbols match. Stand-in deleted |
-| akchar.cc, ak.cc, akworld.cc | stand-ins (regenerated: local pointer tables are now relocations too) |
+| akchar.cc | **done**: `src/akchar.cc` + `src/akchar.h`. All 9 functions (character creation, shop, save/load, Lord British, upkeep, death) and all 249 symbols match. Stand-in deleted. The tricky part, end-of-function dead jumps that depend on the functions before them, is explained in MATCHING.md |
+| ak.cc, akworld.cc | stand-ins (regenerated: local pointer tables are now relocations too) |
 
 `python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
 names, strings and switch tables. `tools/gxx.py src/NAME.cc` compares functions, and also
@@ -102,6 +103,7 @@ symbols when the file is a whole object.
 | `src/standin/*.s` | generated stand-ins for ak.cc, akaux.cc, akchar.cc, akmenu.cc, akworld.cc; each is deleted when its C++ matches |
 | `tools/exediff.py`, `fat12.py` | copied from u1; not used yet |
 | `docs/PLAN.md`, `docs/MAP.md` | the plan; the map of AK.EXE |
+| `docs/MATCHING.md`, `docs/FINDINGS.md` | how gcc 2.7.2.1 -O0 code reads; bugs and mechanics found in the game's code |
 
 Git: `master`, local only, author set in the repository's config as in u1. `tools/u1/`
 (Lattice-era tools from u1) and the Lattice/MS C archives in `tools/` are ignored by git.
@@ -136,6 +138,7 @@ Git: `master`, local only, author set in the repository's config as in u1. `tool
 | gpp2721b.zip | 681045 | 6e2b72e9b60fb54aa79177b97c39f490e1cc474f | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | cc1plus 2.7.2.1 |
 | lgp271b.zip | 638706 | c13396c901ca3c2ebd8f01a6f751723146fc0296 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | libg++ 2.7.1 (libgpp.a, libiostr.a, libstdcx.a) |
 | alleg22.zip | 1007783 | 56f8c1362a3f2920b584201cc159faa0f80e0162 | liballeg.org/files/ | Allegro 2.2 source (1997-03-01) |
+| gcc2721s.zip | 4574996 | 77086f804981a16a429ac29209200a35cc155521 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | gcc 2.7.2.1 source: read to explain codegen (cp/decl.c, stmt.c, cp/parse.y); not needed to build |
 | bnu281b.zip | 1896445 | 7230cb4ab1e3a8a11312fce8c7634e265059cc53 | archive.org item `czchip200001cd` (Czech *Chip* 2000-01 CD), file `ZKUSTE/FREESOFT/BIN/BNU281B/BNU281B.ZIP`, read from the CD image with HTTP range requests | binutils 2.8.1 (files dated 1997-07 to 1998-01): the game's assembler |
 
 gcc 2.7.2.1 is no longer in the DJGPP archive. Its `deleted/v2gnu/gcc2721.txt` points to Martin
@@ -191,7 +194,7 @@ python tools/libmatch.py --quiet # all library objects identical
 python tools/build.py            # SECTIONS IDENTICAL to the original COFF
 ```
 
-1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc and akaux.cc (done), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
+1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc, akaux.cc and akchar.cc (done), then ak.cc (10 KB, with `-g`: its line numbers
    fix the source's line layout), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB).
    - Loop per function: `tools/gxx.py src/akmenu.cc`.
    - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the
