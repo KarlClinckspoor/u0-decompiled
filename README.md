@@ -1,0 +1,33 @@
+# u0-decompiled
+
+Work towards source code for the PC port of **Akalabeth: World of Doom** (Richard Garriott 1979;
+MS-DOS port by Corey Roth with Nathan Tucker, 1997/98, made for the Ultima IX vault), meant to
+rebuild with the original tools into files identical to the GOG release, byte for byte. The
+sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` are the models.
+
+## Status
+
+| file | what | status |
+|---|---|---|
+| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **unpacked and mapped** (phase 1): `build/AK.COF` and docs/MAP.md. No source yet |
+| AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
+| SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
+
+The plan is docs/PLAN.md; the current state and next steps are in docs/HANDOFF.md.
+
+## Tools
+
+The repository contains neither the game nor the tools. Put the GOG files in `gamedata/`. Then:
+
+```sh
+python tools/wdosx.py unpack gamedata/AK.EXE      # -> build/AK.COF (+ the kernel and stub)
+python tools/coff.py files build/AK.COF           # objects in link order
+python tools/coff.py funcs build/AK.COF akworld.cc
+python tools/coff.py types build/AK.COF ak.cc     # classes from ak.cc's -g information
+python tools/akdat.py list                        # AK.DAT's objects
+```
+
+None of them needs anything beyond Python 3. capstone (`../u1-decompiled/build/venv`) is useful
+for disassembly. `tools/dos.py`, `setup.py`, `exediff.py` and `fat12.py` are copied from u1 and
+are to be adapted for the DJGPP toolchain (phase 2). `tools/u1/` (ignored by git) holds the rest
+of u1's Lattice-era tools that were in this folder.

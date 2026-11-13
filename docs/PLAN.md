@@ -1,6 +1,10 @@
 # Plan: Akalabeth decompilation (u0-decompiled)
 
-Written 2026-11-13. Nothing is built yet. This plan is based on the sister projects
+Written 2026-11-13. **Status: phases 0 and 1 done (2026-11-13). AK.EXE is unpacked to
+`build/AK.COF` without WDOSX's source, and the COFF is not stripped: link order, every name, and
+`-g` information for ak.cc (docs/MAP.md). The game is 5 objects, 36 functions and 100 KB of
+`.text`. Next is phase 2, which needs the toolchain archives (§4). docs/HANDOFF.md has the
+results.** This plan is based on the sister projects
 `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` (their README, docs/HANDOFF.md,
 FINDINGS.md, MATCHING.md and U3's PLAN.md), on `../u6md-decompiled/U6-LESSONS_DECOMPILATION.md`,
 and on a first look at the GOG files in `gamedata/`. The goal is the same as theirs: source that
@@ -98,7 +102,10 @@ still passing.
 README.md, docs/HANDOFF.md. Clear out or set aside the Lattice tools in `tools/`, keeping
 `dos.py`, `fat12.py` and the pattern of `setup.py`. Write down the sha1 of every gamedata file.
 
-**Phase 1: unpack.** Write `tools/wdosx.py`, which reads the WDOSX/WFSE layers and unpacks
+**Phase 1: unpack (done).** Result: the decompressor is the one the kernel uses on itself (read
+from its 16-bit code), so WDOSX's source was not needed. `tools/wdosx.py`, `tools/coff.py` and
+`tools/akdat.py` exist; docs/MAP.md has the outputs. The original text of the phase follows.
+Write `tools/wdosx.py`, which reads the WDOSX/WFSE layers and unpacks
 `WdosxMain` into `build/AK.COF`. Work out the decompressor from WDOSX 0.97's published source
 (its packer is Tippach's own). The fallback, if the source cannot be had, is to run AK.EXE in a
 DOSBox debugger build and dump the program memory after load. That dump is weaker: it gives the
@@ -189,7 +196,7 @@ against the archive.
 | make (mak37xb) | `v2gnu/` | to build Allegro |
 | CWSDPMI (csdpmi3b or 4b) | `v2misc/` | DPMI host in DOSBox |
 | Allegro 2.2 source (alleg22) | Allegro's old-release archive | rebuild liballeg.a, SETUP.EXE |
-| WDOSX 0.97 with source | Michael Tippach's site (archived) | unpacker (phase 1) and `stubit` (phase 7) |
+| WDOSX 0.97 | Michael Tippach's site (archived) | `stubit` (phase 7); no longer needed for unpacking |
 | (optional) gcc 2.7.2, binutils 2.6/2.8 | `v2gnu/` | if 2.7.2.1 does not match |
 | (optional) the Applesoft listing of Akalabeth | published widely | reference for names and findings, not copied into the repo |
 
@@ -211,8 +218,14 @@ against the archive.
   variables) will be needed. Write them down as they are found.
 - **Allegro flags.** Corey Roth may have built Allegro with flags other than the defaults, or
   patched it. libmatch will show which modules differ.
-- **Scale.** Unknown until phase 1. The BASIC original is about a thousand lines, so the C++ is
-  probably a few thousand. That is small next to U1's OUT.EXE.
+- **Scale (settled in phase 1).** 36 game functions, 100 KB of `.text` including literals. Two
+  functions dominate: `drawmonsters` (39 KB) and `drawdungeon` (14 KB), probably long runs of
+  similar drawing calls. Smaller than U1's OUT.EXE in function count, larger in bytes.
+- **The packer (settled in phase 1).** The decoder is understood. For phase 7, WDOSX's packer
+  must still give the same packed bytes, and the junk after the WFSE name (§HANDOFF) must be
+  reproduced or copied.
+- **ak.cc's line numbers (found in phase 1).** A whole-COFF match includes ak.cc's 316 line
+  numbers, so its source must keep the original line layout. The other four objects have none.
 
 ## 6. First session checklist
 
