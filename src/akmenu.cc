@@ -11,6 +11,7 @@
 #include <fstream.h>
 #include <allegro.h>
 #include "akmenu.h"
+#include "akdefs.h"
 
 akmenu::akmenu()                                        // 0071E4
 {
@@ -26,7 +27,7 @@ int akmenu::runmenu(char **item)                        // 007240
     t1 = 0;
     t2 = 0;
     clear(screen);
-    textout(screen, font, "Ultima 0 - Akalabeth", 72, 64, 11);
+    textout(screen, font, "Ultima 0 - Akalabeth", 72, 64, CLR_LIGHTCYAN);
     ifstream quotes("quotes.flg");
     ifstream endgame("endgame.flg");
     if (quotes) t1 = 1;
@@ -57,15 +58,15 @@ int akmenu::draw(char **item)                           // 007404
 {
     int i;
     for (i = 1; i <= 4; i++)
-        textout(screen, font, item[i], 80, (i + 15) * 8, 15);
+        textout(screen, font, item[i], 80, (i + 15) * 8, CLR_WHITE);
     if (t1 == 1 & t2 != 1)
-        textout(screen, font, item[5], 80, 160, 15);
+        textout(screen, font, item[MENU_QUOTES], 80, 160, CLR_WHITE);
     if (t1 != 1 & t2 == 1)
-        textout(screen, font, item[6], 80, 160, 15);
+        textout(screen, font, item[MENU_ENDING], 80, 160, CLR_WHITE);
     if (t1 == 1 & t2 == 1)
     {
-        textout(screen, font, item[5], 80, 160, 15);
-        textout(screen, font, item[6], 80, 168, 15);
+        textout(screen, font, item[MENU_QUOTES], 80, 160, CLR_WHITE);
+        textout(screen, font, item[MENU_ENDING], 80, 168, CLR_WHITE);
     }
     return 0;
 }
@@ -76,47 +77,47 @@ int akmenu::redraw(char **item)                         // 007550
 {
     if (pos == 1)
     {
-        textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, 15);
-        textout(screen, font, item[pos], 80, (pos + 15) * 8, 12);
+        textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, CLR_WHITE);
+        textout(screen, font, item[pos], 80, (pos + 15) * 8, CLR_LIGHTRED);
     }
     else if (pos == max)
     {
         if (max != 5)
         {
-            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, 15);
-            textout(screen, font, item[pos], 80, (pos + 15) * 8, 12);
+            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, CLR_WHITE);
+            textout(screen, font, item[pos], 80, (pos + 15) * 8, CLR_LIGHTRED);
         }
         else
         {
-            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, 15);
+            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, CLR_WHITE);
             if (t1 != 1)
-                textout(screen, font, item[6], 80, (pos + 15) * 8, 12);
+                textout(screen, font, item[MENU_ENDING], 80, (pos + 15) * 8, CLR_LIGHTRED);
             else
-                textout(screen, font, item[pos], 80, (pos + 15) * 8, 12);
+                textout(screen, font, item[pos], 80, (pos + 15) * 8, CLR_LIGHTRED);
         }
     }
     else
     {
         if (t1 == 0 & t2 != 1)
         {
-            textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, 15);
-            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, 15);
-            textout(screen, font, item[pos], 80, (pos + 15) * 8, 12);
+            textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, CLR_WHITE);
+            textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, CLR_WHITE);
+            textout(screen, font, item[pos], 80, (pos + 15) * 8, CLR_LIGHTRED);
         }
         else
         {
-            if (pos + 1 == 5 & t1 != 1)
-                textout(screen, font, item[6], 80, (pos + 16) * 8, 15);
+            if (pos + 1 == MENU_QUOTES & t1 != 1)
+                textout(screen, font, item[MENU_ENDING], 80, (pos + 16) * 8, CLR_WHITE);
             else
-                textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, 15);
-            if (pos - 1 == 5 & t1 != 1)
-                textout(screen, font, item[6], 80, (pos + 14) * 8, 15);
+                textout(screen, font, item[pos + 1], 80, (pos + 16) * 8, CLR_WHITE);
+            if (pos - 1 == MENU_QUOTES & t1 != 1)
+                textout(screen, font, item[MENU_ENDING], 80, (pos + 14) * 8, CLR_WHITE);
             else
-                textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, 15);
-            if (pos == 5 & t1 != 1)
-                textout(screen, font, item[6], 80, (pos + 15) * 8, 12);
+                textout(screen, font, item[pos - 1], 80, (pos + 14) * 8, CLR_WHITE);
+            if (pos == MENU_QUOTES & t1 != 1)
+                textout(screen, font, item[MENU_ENDING], 80, (pos + 15) * 8, CLR_LIGHTRED);
             else
-                textout(screen, font, item[pos], 80, (pos + 15) * 8, 12);
+                textout(screen, font, item[pos], 80, (pos + 15) * 8, CLR_LIGHTRED);
         }
     }
     return 0;

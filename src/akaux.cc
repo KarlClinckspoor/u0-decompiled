@@ -6,6 +6,7 @@
 #include <allegro.h>
 #include "ak.h"
 #include "akaux.h"
+#include "akdefs.h"
 
 // Only checks that AK.DAT can be loaded (the datafile is not kept).
 akaux::akaux()                                          // 003D08
@@ -29,12 +30,12 @@ akaux::~akaux()                                         // 003D5C
 void akaux::hello()                                     // 003DB4
 {
     int key;
-    textout(screen, font, "Ultima 0 - Akalabeth!", 48, 88, 11);
-    textout(screen, font, "Ready? ", 24, 160, 11);
+    textout(screen, font, "Ultima 0 - Akalabeth!", 48, 88, CLR_LIGHTCYAN);
+    textout(screen, font, "Ready? ", 24, 160, CLR_LIGHTCYAN);
     key = readkey() & 0xff;
     if (key == 'n' | key == 'N')
     {
-        textout(screen, font, "Then Leave and Begone!", 24, 168, 11);
+        textout(screen, font, "Then Leave and Begone!", 24, 168, CLR_LIGHTCYAN);
         readkey();
         text_mode(0);
         exit(1);
@@ -63,10 +64,10 @@ void akaux::instruct()                                  // 003E88
     while ((line = strsep(rest, ";")) != NULL)
     {
         if (strchr(line, '~') == NULL)
-            textout(screen, font, line, 0, row++ * 12, 11);
+            textout(screen, font, line, 0, row++ * 12, CLR_LIGHTCYAN);
         else
         {
-            textout_centre(screen, font, "Press any Key to Continue", 160, (row + 1) * 12, 11);
+            textout_centre(screen, font, "Press any Key to Continue", 160, (row + 1) * 12, CLR_LIGHTCYAN);
             readkey();
             clear(screen);
             row = 0;
@@ -181,7 +182,7 @@ void akaux::quotes()                                    // 004844
     for (step = 200; step >= 0; step--)
     {
         for (i = 0; i <= last; i++)
-            textout_centre(screen, font, quote[i], 160, i * 8 + step, 11);
+            textout_centre(screen, font, quote[i], 160, i * 8 + step, CLR_LIGHTCYAN);
         if (step % 8 == 0)
             last++;
         rest(100);
@@ -195,7 +196,7 @@ void akaux::quotes()                                    // 004844
     {
         for (i = first; i <= last; i++)
             if (i <= 93)
-                textout_centre(screen, font, quote[i], 160, (i - first) * 8 + shift, 11);
+                textout_centre(screen, font, quote[i], 160, (i - first) * 8 + shift, CLR_LIGHTCYAN);
         shift--;
         if (step % 8 == 0)
         {
@@ -258,7 +259,7 @@ void akaux::shoutouts()                                 // 004D30
     for (step = 200; step >= 0; step--)
     {
         for (i = 0; i <= last; i++)
-            textout_centre(screen, font, credit[i], 160, i * 8 + step, 11);
+            textout_centre(screen, font, credit[i], 160, i * 8 + step, CLR_LIGHTCYAN);
         if (step % 8 == 0)
             last++;
         rest(100);
@@ -272,7 +273,7 @@ void akaux::shoutouts()                                 // 004D30
     {
         for (i = first; i <= last; i++)
             if (i <= 36)
-                textout_centre(screen, font, credit[i], 160, (i - first) * 8 + shift, 11);
+                textout_centre(screen, font, credit[i], 160, (i - first) * 8 + shift, CLR_LIGHTCYAN);
         shift--;
         if (step % 8 == 0)
         {

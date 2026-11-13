@@ -14,6 +14,7 @@
 #include <conio.h>
 #include "ak.h"
 #include "akchar.h"
+#include "akdefs.h"
 
 charsave::charsave()                                    // 004F9C
 {
@@ -36,21 +37,21 @@ void charsave::charcreate()                             // 005134
                     "Stamina........", "Wisdom.........", "Gold..........."};
     remove_keyboard();
     clear(screen);
-    textout(screen, font, "Type thy Lucky Number.....", 8, 40, 11);
+    textout(screen, font, "Type thy Lucky Number.....", 8, 40, CLR_LIGHTCYAN);
     gotoxy(28, 6);
     cin >> input;
     sav.ln = atoi(input);
     srandom(sav.ln);
-    textout(screen, font, "Level of play (1-10)......", 8, 56, 11);
+    textout(screen, font, "Level of play (1-10)......", 8, 56, CLR_LIGHTCYAN);
     gotoxy(28, 8);
     cin >> input;
     sav.level = atoi(input);
     while (sav.level <= 0 | sav.level > 10)
     {
-        textout(screen, font, "Invalid Choice!", 8, 64, 11);
+        textout(screen, font, "Invalid Choice!", 8, 64, CLR_LIGHTCYAN);
         rest(1500);
-        textout(screen, font, "                 ", 0, 64, 1);
-        textout(screen, font, "Level of play (1-10)......       ", 8, 56, 11);
+        textout(screen, font, "                 ", 0, 64, CLR_BLUE);
+        textout(screen, font, "Level of play (1-10)......       ", 8, 56, CLR_LIGHTCYAN);
         gotoxy(28, 8);
         cin >> input;
         sav.level = atoi(input);
@@ -61,19 +62,19 @@ void charsave::charcreate()                             // 005134
         for (i = 0; i <= 5; i++)
         {
             sav.character[i] = floor(sqrt(random() % 100 * .01) * 21 + 4);
-            textout(screen, font, stat[i], 8, i * 8 + 80, 11);
+            textout(screen, font, stat[i], 8, i * 8 + 80, CLR_LIGHTCYAN);
             itoa(sav.character[i], num, 10);
             strcat(num, "  ");
-            textout(screen, font, num, 128, i * 8 + 80, 11);
+            textout(screen, font, num, 128, i * 8 + 80, CLR_LIGHTCYAN);
         }
-        textout(screen, font, "Shallt thou play with these qualities?", 0, 136, 11);
+        textout(screen, font, "Shallt thou play with these qualities?", 0, 136, CLR_LIGHTCYAN);
         gotoxy(20, 18);
         key = readkey() & 0xff;
     }
     key = 0;
     while (key != 'f' & key != 'F' & key != 'm' & key != 'M')
     {
-        textout(screen, font, "And Shallt thou be a Fighter or a Mage?", 0, 154, 11);
+        textout(screen, font, "And Shallt thou be a Fighter or a Mage?", 0, 154, CLR_LIGHTCYAN);
         gotoxy(20, 19);
         key = readkey() & 0xff;
         if (key <= 'Z') key += 32;
@@ -106,49 +107,49 @@ int charsave::shop(int mode)                            // 0056B8
                     "Stamina........", "Wisdom.........", "Gold..........."};
     char *weapon[] = {"Food", "Rapier", "Axe", "Shield", "Bow and Arrow", "Magic Amulet"};
     clear(screen);
-    textout(screen, font, "Stat's", 48, 16, 13);
-    textout(screen, font, "Weapons", 168, 16, 13);
+    textout(screen, font, "Stat's", 48, 16, CLR_LIGHTMAGENTA);
+    textout(screen, font, "Weapons", 168, 16, CLR_LIGHTMAGENTA);
     for (i = 0; i <= 5; i++)
     {
-        textout(screen, font, stat[i], 0, i * 8 + 32, 11);
+        textout(screen, font, stat[i], 0, i * 8 + 32, CLR_LIGHTCYAN);
         itoa(sav.character[i], num, 10);
-        textout(screen, font, num, 120, i * 8 + 32, 9);
+        textout(screen, font, num, 120, i * 8 + 32, CLR_LIGHTBLUE);
         itoa(sav.owned[i], num, 10);
         if (sav.owned[i] <= 9)
-            textout(screen, font, num, 192, i * 8 + 32, 9);
+            textout(screen, font, num, 192, i * 8 + 32, CLR_LIGHTBLUE);
         if (sav.owned[i] > 9 & sav.owned[i] <= 99)
-            textout(screen, font, num, 184, i * 8 + 32, 9);
+            textout(screen, font, num, 184, i * 8 + 32, CLR_LIGHTBLUE);
         if (sav.owned[i] > 99 & sav.owned[i] <= 999)
-            textout(screen, font, num, 176, i * 8 + 32, 9);
+            textout(screen, font, num, 176, i * 8 + 32, CLR_LIGHTBLUE);
         if (sav.owned[i] > 999 & sav.owned[i] <= 9999)
-            textout(screen, font, num, 168, i * 8 + 32, 9);
-        textout(screen, font, "-", 200, i * 8 + 32, 9);
-        textout(screen, font, weapon[i], 208, i * 8 + 32, 11);
+            textout(screen, font, num, 168, i * 8 + 32, CLR_LIGHTBLUE);
+        textout(screen, font, "-", 200, i * 8 + 32, CLR_LIGHTBLUE);
+        textout(screen, font, weapon[i], 208, i * 8 + 32, CLR_LIGHTCYAN);
     }
-    textout(screen, font, "Q-Quit", 144, 80, 9);
-    textout(screen, font, "Price", 40, 128, 13);
-    textout(screen, font, "Damage", 120, 128, 13);
-    textout(screen, font, "Item", 200, 128, 13);
-    textcolor(11);
+    textout(screen, font, "Q-Quit", 144, 80, CLR_LIGHTBLUE);
+    textout(screen, font, "Price", 40, 128, CLR_LIGHTMAGENTA);
+    textout(screen, font, "Damage", 120, 128, CLR_LIGHTMAGENTA);
+    textout(screen, font, "Item", 200, 128, CLR_LIGHTMAGENTA);
+    textcolor(CLR_LIGHTCYAN);
     for (i = 0; i <= 5; i++)
-        textout(screen, font, weapon[i], 200, i * 8 + 144, 11);
-    textout(screen, font, "1 For 10", 40, 144, 11);
-    textout(screen, font, "N/A", 120, 144, 11);
-    textout(screen, font, "8", 40, 152, 11);
-    textout(screen, font, "1-10", 120, 152, 11);
-    textout(screen, font, "5", 40, 160, 11);
-    textout(screen, font, "1-5", 120, 160, 11);
-    textout(screen, font, "6", 40, 168, 11);
-    textout(screen, font, "1", 120, 168, 11);
-    textout(screen, font, "3", 40, 176, 11);
-    textout(screen, font, "1-4", 120, 176, 11);
-    textout(screen, font, "15", 40, 184, 11);
-    textout(screen, font, "?????", 120, 184, 11);
+        textout(screen, font, weapon[i], 200, i * 8 + 144, CLR_LIGHTCYAN);
+    textout(screen, font, "1 For 10", 40, 144, CLR_LIGHTCYAN);
+    textout(screen, font, "N/A", 120, 144, CLR_LIGHTCYAN);
+    textout(screen, font, "8", 40, 152, CLR_LIGHTCYAN);
+    textout(screen, font, "1-10", 120, 152, CLR_LIGHTCYAN);
+    textout(screen, font, "5", 40, 160, CLR_LIGHTCYAN);
+    textout(screen, font, "1-5", 120, 160, CLR_LIGHTCYAN);
+    textout(screen, font, "6", 40, 168, CLR_LIGHTCYAN);
+    textout(screen, font, "1", 120, 168, CLR_LIGHTCYAN);
+    textout(screen, font, "3", 40, 176, CLR_LIGHTCYAN);
+    textout(screen, font, "1-4", 120, 176, CLR_LIGHTCYAN);
+    textout(screen, font, "15", 40, 184, CLR_LIGHTCYAN);
+    textout(screen, font, "?????", 120, 184, CLR_LIGHTCYAN);
     gotoxy(1, 13);
     if (mode != -1)
     {
-        textout(screen, font, "Welcome to the Adventure Shop", 8, 96, 11);
-        textout(screen, font, "Which item shallt thou buy", 8, 104, 11);
+        textout(screen, font, "Welcome to the Adventure Shop", 8, 96, CLR_LIGHTCYAN);
+        textout(screen, font, "Which item shallt thou buy", 8, 104, CLR_LIGHTCYAN);
     }
     else
         readkey();
@@ -159,37 +160,37 @@ again:
         switch (key)
         {
         case 'F': case 'f':
-            item = 0;
+            item = IT_FOOD;
             price = 1;
             break;
         case 'R': case 'r':
-            item = 1;
+            item = IT_RAPIER;
             price = 8;
             if (sav.ChClass == 'M')
             {
-                textout(screen, font, "I'm sorry Mages can't use that!", 8, 96, 11);
+                textout(screen, font, "I'm sorry Mages can't use that!", 8, 96, CLR_LIGHTCYAN);
                 ok = 0;
             }
             break;
         case 'A': case 'a':
-            item = 2;
+            item = IT_AXE;
             price = 5;
             break;
         case 'S': case 's':
-            item = 3;
+            item = IT_SHIELD;
             price = 6;
             break;
         case 'B': case 'b':
-            item = 4;
+            item = IT_BOW;
             price = 3;
             if (sav.ChClass == 'M')
             {
-                textout(screen, font, "I'm sorry Mages can't use that!", 8, 96, 11);
+                textout(screen, font, "I'm sorry Mages can't use that!", 8, 96, CLR_LIGHTCYAN);
                 ok = 0;
             }
             break;
         case 'M': case 'm':
-            item = 5;
+            item = IT_AMULET;
             price = 15;
             break;
         case 'Q': case 'q':
@@ -198,35 +199,35 @@ again:
         default:
             item = 0;
             price = 0;
-            textout(screen, font, "I'm Sorry We Don't have that.   ", 8, 96, 11);
+            textout(screen, font, "I'm Sorry We Don't have that.   ", 8, 96, CLR_LIGHTCYAN);
             goto again;
         }
-        if (sav.character[5] - price >= 0)
+        if (sav.character[ST_GOLD] - price >= 0)
         {
             if (key != 0)
             {
-                if (item == 0)
+                if (item == IT_FOOD)
                     sav.owned[item] = sav.owned[item] + 10;
                 else
                     sav.owned[item] = sav.owned[item] + 1;
-                sav.character[5] -= price;
+                sav.character[ST_GOLD] -= price;
                 itoa(sav.owned[item], num, 10);
                 if (sav.owned[item] <= 9)
-                    textout(screen, font, num, 192, item * 8 + 32, 9);
+                    textout(screen, font, num, 192, item * 8 + 32, CLR_LIGHTBLUE);
                 if (sav.owned[item] > 9 & sav.owned[item] <= 99)
-                    textout(screen, font, num, 184, item * 8 + 32, 9);
+                    textout(screen, font, num, 184, item * 8 + 32, CLR_LIGHTBLUE);
                 if (sav.owned[item] > 99 & sav.owned[item] <= 999)
-                    textout(screen, font, num, 176, item * 8 + 32, 9);
+                    textout(screen, font, num, 176, item * 8 + 32, CLR_LIGHTBLUE);
                 if (sav.owned[item] > 999 & sav.owned[item] <= 9999)
-                    textout(screen, font, num, 168, item * 8 + 32, 9);
-                itoa(sav.character[5], num, 10);
-                textout(screen, font, "   ", 120, 72, 9);
-                textout(screen, font, num, 120, 72, 9);
-                textout(screen, font, "Thank you m'lord.               ", 8, 96, 11);
+                    textout(screen, font, num, 168, item * 8 + 32, CLR_LIGHTBLUE);
+                itoa(sav.character[ST_GOLD], num, 10);
+                textout(screen, font, "   ", 120, 72, CLR_LIGHTBLUE);
+                textout(screen, font, num, 120, 72, CLR_LIGHTBLUE);
+                textout(screen, font, "Thank you m'lord.               ", 8, 96, CLR_LIGHTCYAN);
             }
         }
         else
-            textout(screen, font, "M'Lord thou can not afford that item.", 8, 96, 11);
+            textout(screen, font, "M'Lord thou can not afford that item.", 8, 96, CLR_LIGHTCYAN);
     }
     return 0;
 }
@@ -237,13 +238,13 @@ int charsave::savegame()                                // 00610C
     FILE *f;
     if ((f = fopen("player.u0", "wb")) == NULL)
     {
-        textout(screen, font, "Save Game Failed!", 8, 175, 9);
+        textout(screen, font, "Save Game Failed!", 8, 175, CLR_LIGHTBLUE);
         fprintf(stderr, "Error: Can not open player.u0\n");
         return 1;
     }
     fwrite(&sav, sizeof(sav), 1, f);
     fclose(f);
-    textout(screen, font, "Save Game Complete!", 8, 175, 9);
+    textout(screen, font, "Save Game Complete!", 8, 175, CLR_LIGHTBLUE);
     return 0;
 }
 
@@ -297,27 +298,27 @@ int charsave::lb()                                      // 0064CC
             if (strchr(line, '`') == NULL)
             {
                 if (skip == 0)
-                    textout(screen, font, line, 0, row++ * 8, 11);
+                    textout(screen, font, line, 0, row++ * 8, CLR_LIGHTCYAN);
                 else
                     skip = 1;
             }
         }
         remove_keyboard();
-        textout(screen, font, "What is thy name peasant? ", 0, 64, 11);
+        textout(screen, font, "What is thy name peasant? ", 0, 64, CLR_LIGHTCYAN);
         gotoxy(27, 9);
         cin >> sav.name;
-        textout(screen, font, "Doest thou wish for grand adventure? ", 0, 80, 11);
+        textout(screen, font, "Doest thou wish for grand adventure? ", 0, 80, CLR_LIGHTCYAN);
         install_keyboard();
         key = readkey() & 0xff;
         if (key != 'y' & key != 'Y')
         {
-            textout(screen, font, "Then Leave and Begone!", 0, 96, 11);
+            textout(screen, font, "Then Leave and Begone!", 0, 96, CLR_LIGHTCYAN);
             sav.visit = 0;
         }
         else
         {
-            sav.task = floor(sav.character[4] / 3);
-            if (sav.task > 10) sav.task = 10;
+            sav.task = floor(sav.character[ST_WISDOM] / 3);
+            if (sav.task > MON_BALROG) sav.task = MON_BALROG;
             for (row = 0; row <= 5; row++)
                 sav.character[row] = sav.character[row] + 1;
             char *text = (char *)dat[AKLB2].dat;
@@ -328,18 +329,18 @@ int charsave::lb()                                      // 0064CC
             {
                 if (strchr(line, '~') != NULL)
                 {
-                    textout_centre(screen, font, "Press any Key to Continue", 160, (row + 1) * 8 + 80, 11);
+                    textout_centre(screen, font, "Press any Key to Continue", 160, (row + 1) * 8 + 80, CLR_LIGHTCYAN);
                     readkey();
                     clear(screen);
                     row = 0;
                     return 0;
                 }
                 if (strchr(line, ')') == NULL)
-                    textout(screen, font, monster[sav.task], 104, 136, 9);
+                    textout(screen, font, monster[sav.task], 104, 136, CLR_LIGHTBLUE);
                 if (strchr(line, '`') == NULL)
                 {
                     if (skip == 0)
-                        textout(screen, font, line, 0, row++ * 8 + 80, 11);
+                        textout(screen, font, line, 0, row++ * 8 + 80, CLR_LIGHTCYAN);
                     else
                         skip = 1;
                 }
@@ -350,19 +351,19 @@ int charsave::lb()                                      // 0064CC
     {
         if (sav.task > 0)
         {
-            textout(screen, font, "Why hast thou returned?", 0, 24, 11);
-            textout(screen, font, "Thou must kill a(n) ", 0, 32, 11);
-            textout(screen, font, monster[sav.task], 160, 32, 9);
-            textout(screen, font, "Go now and complete thy quest!", 0, 48, 11);
+            textout(screen, font, "Why hast thou returned?", 0, 24, CLR_LIGHTCYAN);
+            textout(screen, font, "Thou must kill a(n) ", 0, 32, CLR_LIGHTCYAN);
+            textout(screen, font, monster[sav.task], 160, 32, CLR_LIGHTBLUE);
+            textout(screen, font, "Go now and complete thy quest!", 0, 48, CLR_LIGHTCYAN);
         }
         else
         {
             for (row = 0; row <= 5; row++)
                 sav.character[row] = sav.character[row] + 1;
-            textout(screen, font, "Aahh.....", 0, 24, 11);
-            textout(screen, font, sav.name, 72, 24, 11);
-            textout(screen, font, "Thou hast accomplished thy quest!", 0, 40, 11);
-            if (abs(sav.task) == 10)
+            textout(screen, font, "Aahh.....", 0, 24, CLR_LIGHTCYAN);
+            textout(screen, font, sav.name, 72, 24, CLR_LIGHTCYAN);
+            textout(screen, font, "Thou hast accomplished thy quest!", 0, 40, CLR_LIGHTCYAN);
+            if (abs(sav.task) == MON_BALROG)
             {
                 char *text = (char *)dat[AKLB3].dat;
                 char **rest = &text;
@@ -372,33 +373,33 @@ int charsave::lb()                                      // 0064CC
                     if (strchr(line, '`') == NULL)
                     {
                         if (skip == 0)
-                            textout(screen, font, line, 0, row++ * 8 + 48, 11);
+                            textout(screen, font, line, 0, row++ * 8 + 48, CLR_LIGHTCYAN);
                         else
                             skip = 1;
                     }
                 }
                 if (sav.level > 9)
                 {
-                    textout(screen, font, "...Report thy Amazing feat to  ", 0, 96, 11);
-                    textout(screen, font, "Lord British today!", 0, 104, 11);
+                    textout(screen, font, "...Report thy Amazing feat to  ", 0, 96, CLR_LIGHTCYAN);
+                    textout(screen, font, "Lord British today!", 0, 104, CLR_LIGHTCYAN);
                     ofstream quotes("quotes.flg");
                     ofstream endgame("endgame.flg");
                 }
                 else
                 {
-                    textout(screen, font, "   Now maybe thou art foolhearty", 0, 96, 11);
-                    textout(screen, font, "enough to try difficulty level ", 0, 104, 11);
+                    textout(screen, font, "   Now maybe thou art foolhearty", 0, 96, CLR_LIGHTCYAN);
+                    textout(screen, font, "enough to try difficulty level ", 0, 104, CLR_LIGHTCYAN);
                     itoa(sav.level + 1, num, 10);
-                    textout(screen, font, num, 256, 96, 9);
+                    textout(screen, font, num, 256, 96, CLR_LIGHTBLUE);
                 }
             }
             else
             {
-                textout(screen, font, "Unfortunately, this is not enough to", 0, 56, 11);
-                textout(screen, font, "become a Kinght.", 0, 64, 11);
+                textout(screen, font, "Unfortunately, this is not enough to", 0, 56, CLR_LIGHTCYAN);
+                textout(screen, font, "become a Kinght.", 0, 64, CLR_LIGHTCYAN);
                 sav.task = abs(sav.task) + 1;
-                textout(screen, font, "Now Thou Must Kill a(n) ", 0, 72, 11);
-                textout(screen, font, monster[sav.task], 192, 72, 9);
+                textout(screen, font, "Now Thou Must Kill a(n) ", 0, 72, CLR_LIGHTCYAN);
+                textout(screen, font, monster[sav.task], 192, 72, CLR_LIGHTBLUE);
             }
         }
     }
@@ -414,52 +415,52 @@ int charsave::checkstatus()                             // 006C98
     count++;
     if (sav.inout == 0)
     {
-        sav.owned[0]--;
+        sav.owned[IT_FOOD]--;
         count = 0;
     }
     if (sav.inout > 0 & count % 5 == 0)
     {
-        sav.owned[0]--;
+        sav.owned[IT_FOOD]--;
         count = 0;
     }
-    if (sav.owned[0] <= 0)
+    if (sav.owned[IT_FOOD] <= 0)
     {
-        textout(screen, font, "Thou Hast Starved!!!!!", 8, 175, 12);
+        textout(screen, font, "Thou Hast Starved!!!!!", 8, 175, CLR_LIGHTRED);
         death();
-        return 2;
+        return GAME_DEAD;
     }
-    if (sav.character[0] <= 0)
+    if (sav.character[ST_HP] <= 0)
     {
         death();
-        return 2;
+        return GAME_DEAD;
     }
-    textout(screen, font, "             ", 225, 167, 9);
-    textout(screen, font, "Food=", 225, 175, 11);
-    itoa(sav.owned[0], num, 10);
-    textout(screen, font, "    ", 265, 175, 9);
-    if (sav.owned[0] <= 10)
-        textout(screen, font, num, 265, 175, 12);
+    textout(screen, font, "             ", 225, 167, CLR_LIGHTBLUE);
+    textout(screen, font, "Food=", 225, 175, CLR_LIGHTCYAN);
+    itoa(sav.owned[IT_FOOD], num, 10);
+    textout(screen, font, "    ", 265, 175, CLR_LIGHTBLUE);
+    if (sav.owned[IT_FOOD] <= 10)
+        textout(screen, font, num, 265, 175, CLR_LIGHTRED);
     else
-        textout(screen, font, num, 265, 175, 9);
-    textout(screen, font, "H.P.=", 225, 183, 11);
-    textout(screen, font, "    ", 265, 183, 9);
-    itoa(sav.character[0], num, 10);
-    if (sav.character[0] <= 10)
-        textout(screen, font, num, 265, 183, 12);
+        textout(screen, font, num, 265, 175, CLR_LIGHTBLUE);
+    textout(screen, font, "H.P.=", 225, 183, CLR_LIGHTCYAN);
+    textout(screen, font, "    ", 265, 183, CLR_LIGHTBLUE);
+    itoa(sav.character[ST_HP], num, 10);
+    if (sav.character[ST_HP] <= 10)
+        textout(screen, font, num, 265, 183, CLR_LIGHTRED);
     else
-        textout(screen, font, num, 265, 183, 9);
-    textout(screen, font, "Gold=", 225, 191, 11);
-    itoa(sav.character[5], num, 10);
-    textout(screen, font, "    ", 265, 191, 9);
-    textout(screen, font, num, 265, 191, 9);
+        textout(screen, font, num, 265, 183, CLR_LIGHTBLUE);
+    textout(screen, font, "Gold=", 225, 191, CLR_LIGHTCYAN);
+    itoa(sav.character[ST_GOLD], num, 10);
+    textout(screen, font, "    ", 265, 191, CLR_LIGHTBLUE);
+    textout(screen, font, num, 265, 191, CLR_LIGHTBLUE);
     return 1;
 }
 
 void charsave::death()                                  // 0070DC
 {
-    textout_centre(screen, font, "         We mourn the passing of         ", 159, 167, 11);
-    textout_centre(screen, font, "       the Peasant and his Computer      ", 159, 175, 11);
-    textout_centre(screen, font, "   To invoke a miracle of ressurection   ", 159, 183, 11);
-    textout_centre(screen, font, "                Press a Key              ", 159, 191, 11);
+    textout_centre(screen, font, "         We mourn the passing of         ", 159, 167, CLR_LIGHTCYAN);
+    textout_centre(screen, font, "       the Peasant and his Computer      ", 159, 175, CLR_LIGHTCYAN);
+    textout_centre(screen, font, "   To invoke a miracle of ressurection   ", 159, 183, CLR_LIGHTCYAN);
+    textout_centre(screen, font, "                Press a Key              ", 159, 191, CLR_LIGHTCYAN);
     readkey();
 }

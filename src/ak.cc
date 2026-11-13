@@ -11,7 +11,7 @@
 #include "akchar.h"
 #include "akmenu.h"
 #include "akworld.h"
-
+#include "akdefs.h"
 // One move on the world map per key: the arrows walk (mountains block), E enters the town,
 // castle or dungeon under the player, Q or Ctrl-S saves, Ctrl-R loads, Z shows the stats.
 // Returns 0 when the player enters a dungeon or loads a game, 1 when Ctrl-Q or Ctrl-E ends
@@ -25,80 +25,80 @@ int rungame(charsave &player, akworld &w)
     int i = 0;
     int result;
     char string[10];
-    if (player.checkstatus() == 2) return 2;
+    if (player.checkstatus() == GAME_DEAD) return GAME_DEAD;
     w.backmid = load_midi("over.mid");
     play_midi(w.backmid, -1);
 
     // Ctrl-Q and Ctrl-E end the game
-    while (ky2 != 17 & ky2 != 5)
+    while (ky2 != CTRL_Q & ky2 != CTRL_E)
     {
         i++;
         key = readkey();
         ky1 = key >> 8;
         ky2 = key & 0xff;
 
-        textout(screen, font, "                           ", 8, 175, 9);
-        textout(screen, font, "                    ", 8, 183, 9);
+        textout(screen, font, "                           ", 8, 175, CLR_LIGHTBLUE);
+        textout(screen, font, "                    ", 8, 183, CLR_LIGHTBLUE);
 
         switch (ky1) {
-        case 72:                                // up
-            if (w.world[player.sav.tx][player.sav.ty - 1] == 1)
+        case KEY_UP:                                // up
+            if (w.world[player.sav.tx][player.sav.ty - 1] == LAND_MOUNTAINS)
             {
                 sound(100);
                 rest(50);
                 sound(0);
-                textout(screen, font, "You cant pass the Mountains!", 8, 175, 11);
+                textout(screen, font, "You cant pass the Mountains!", 8, 175, CLR_LIGHTCYAN);
             }
             else
             {
                 player.sav.ty = player.sav.ty - 1;
                 w.drawworld(player.sav);
-                textout(screen, font, "North       ", 8, 167, 11);
+                textout(screen, font, "North       ", 8, 167, CLR_LIGHTCYAN);
             }
             break;
-        case 77:                                // right
-            if (w.world[player.sav.tx + 1][player.sav.ty] == 1)
+        case KEY_RIGHT:                                // right
+            if (w.world[player.sav.tx + 1][player.sav.ty] == LAND_MOUNTAINS)
             {
                 sound(100);
                 rest(50);
                 sound(0);
-                textout(screen, font, "You cant pass the Mountains!", 8, 175, 11);
+                textout(screen, font, "You cant pass the Mountains!", 8, 175, CLR_LIGHTCYAN);
             }
             else
             {
                 player.sav.tx = player.sav.tx + 1;
                 w.drawworld(player.sav);
-                textout(screen, font, "East        ", 8, 167, 11);
+                textout(screen, font, "East        ", 8, 167, CLR_LIGHTCYAN);
             }
             break;
-        case 80:                                // down
-            if (w.world[player.sav.tx][player.sav.ty + 1] == 1)
+        case KEY_DOWN:                                // down
+            if (w.world[player.sav.tx][player.sav.ty + 1] == LAND_MOUNTAINS)
             {
                 sound(100);
                 rest(50);
                 sound(0);
-                textout(screen, font, "You cant pass the Mountains!", 8, 175, 11);
+                textout(screen, font, "You cant pass the Mountains!", 8, 175, CLR_LIGHTCYAN);
             }
             else
             {
                 player.sav.ty = player.sav.ty + 1;
                 w.drawworld(player.sav);
-                textout(screen, font, "South       ", 8, 167, 11);
+                textout(screen, font, "South       ", 8, 167, CLR_LIGHTCYAN);
             }
             break;
-        case 75:                                // left
-            if (w.world[player.sav.tx - 1][player.sav.ty] == 1)
+        case KEY_LEFT:                                // left
+            if (w.world[player.sav.tx - 1][player.sav.ty] == LAND_MOUNTAINS)
             {
                 sound(100);
                 rest(50);
                 sound(0);
-                textout(screen, font, "You cant pass the Mountains!", 8, 175, 11);
+                textout(screen, font, "You cant pass the Mountains!", 8, 175, CLR_LIGHTCYAN);
             }
             else
             {
                 player.sav.tx = player.sav.tx - 1;
                 w.drawworld(player.sav);
-                textout(screen, font, "West        ", 8, 167, 11);
+                textout(screen, font, "West        ", 8, 167, CLR_LIGHTCYAN);
             }
             break;
         }
@@ -107,7 +107,7 @@ int rungame(charsave &player, akworld &w)
         case 'x':
         case 'E':
         case 'e':
-            if (w.world[player.sav.tx][player.sav.ty] == 3)     // a town: the shop
+            if (w.world[player.sav.tx][player.sav.ty] == LAND_TOWN)     // a town: the shop
             {
                 destroy_midi(w.backmid);
                 w.backmid = load_midi("shop.mid");
@@ -119,7 +119,7 @@ int rungame(charsave &player, akworld &w)
                 play_midi(w.backmid, -1);
                 w.drawworld(player.sav);
             }
-            if (w.world[player.sav.tx][player.sav.ty] == 5)     // Lord British's castle
+            if (w.world[player.sav.tx][player.sav.ty] == LAND_CASTLE)     // Lord British's castle
             {
                 destroy_midi(w.backmid);
                 w.backmid = load_midi("lordbrit.mid");
@@ -130,26 +130,26 @@ int rungame(charsave &player, akworld &w)
                 play_midi(w.backmid, -1);
                 w.drawworld(player.sav);
             }
-            if (w.world[player.sav.tx][player.sav.ty] == 4)     // a dungeon
+            if (w.world[player.sav.tx][player.sav.ty] == LAND_DUNGEON)     // a dungeon
             {
-                textout(screen, font, "Enter Dungeon", 8, 167, 11);
+                textout(screen, font, "Enter Dungeon", 8, 167, CLR_LIGHTCYAN);
                 player.sav.inout = 1;
                 player.sav.dx = 1;
                 player.sav.dy = 0;
                 player.sav.px = 1;
                 player.sav.py = 1;
                 player.sav.lk = 0;
-                return 0;
+                return GAME_NEXT;
             }
             break;
         case 'Q':
         case 'q':
-        case 19:                                // Ctrl-S
+        case CTRL_S:                                // Ctrl-S
             player.savegame();
             break;
-        case 18:                                // Ctrl-R
+        case CTRL_R:                                // Ctrl-R
             player.loadgame();
-            return 0;
+            return GAME_NEXT;
         case 'Z':
         case 'z':
             player.shop(-1);
@@ -158,9 +158,9 @@ int rungame(charsave &player, akworld &w)
             break;
         }
         result = player.checkstatus();
-        if (result == 2) return 2;
+        if (result == GAME_DEAD) return GAME_DEAD;
     }
-    return 1;
+    return GAME_OVER;
 }
 
 // One move in the dungeon per key: arrows, Alt+Left/Right strafe, Alt+Down retreats. Returns 0
@@ -177,41 +177,41 @@ int rundungeon(charsave &player, akworld &w)
     char *item[] = {"Food", "Rapier", "Axe", "Shield", "Bow and Arrow", "Magic Amulet"};
 
 
-    if (player.checkstatus() == 2) return 2;
+    if (player.checkstatus() == GAME_DEAD) return GAME_DEAD;
     w.backmid = load_midi("dungeon.mid");
     play_midi(w.backmid, -1);
     w.mdraw = 0;
 
-    while (ky2 != 17 & ky2 != 5)
+    while (ky2 != CTRL_Q & ky2 != CTRL_E)
     {
         i++;
         key = readkey();
         ky1 = key >> 8;
         ky2 = key & 0xff;
 
-        textout(screen, font, "                           ", 8, 175, 9);
-        textout(screen, font, "                           ", 8, 183, 9);
-        textout(screen, font, "                           ", 8, 191, 9);
+        textout(screen, font, "                           ", 8, 175, CLR_LIGHTBLUE);
+        textout(screen, font, "                           ", 8, 183, CLR_LIGHTBLUE);
+        textout(screen, font, "                           ", 8, 191, CLR_LIGHTBLUE);
 
 
         switch (ky1) {
-        case 72:                                // forward
-            if (w.dng[player.sav.px + player.sav.dx][player.sav.py + player.sav.dy] != 1 & w.dng[player.sav.px + player.sav.dx][player.sav.py + player.sav.dy] < 10)
+        case KEY_UP:                                // forward
+            if (w.dng[player.sav.px + player.sav.dx][player.sav.py + player.sav.dy] != DG_WALL & w.dng[player.sav.px + player.sav.dx][player.sav.py + player.sav.dy] < DG_MONSTER)
             {
                 player.sav.px = player.sav.px + player.sav.dx;
                 player.sav.py = player.sav.py + player.sav.dy;
                 w.drawdungeon(player.sav);
-                textout(screen, font, "Forward      ", 8, 167, 11);
+                textout(screen, font, "Forward      ", 8, 167, CLR_LIGHTCYAN);
             }
             else
                 w.drawdungeon(player.sav);
             break;
-        case 80: player.sav.dx = -player.sav.dx;        // turn around
+        case KEY_DOWN: player.sav.dx = -player.sav.dx;        // turn around
             player.sav.dy = -player.sav.dy;
             w.drawdungeon(player.sav);
-            textout(screen, font, "Turn Around  ", 8, 167, 11);
+            textout(screen, font, "Turn Around  ", 8, 167, CLR_LIGHTCYAN);
             break;
-        case 75: if (player.sav.dx != 0)                // turn left
+        case KEY_LEFT: if (player.sav.dx != 0)                // turn left
             {
                 player.sav.dy = -player.sav.dx;
                 player.sav.dx = 0;
@@ -222,9 +222,9 @@ int rundungeon(charsave &player, akworld &w)
                 player.sav.dy = 0;
             }
             w.drawdungeon(player.sav);
-            textout(screen, font, "Turn Left    ", 8, 167, 11);
+            textout(screen, font, "Turn Left    ", 8, 167, CLR_LIGHTCYAN);
             break;
-        case 77: if (player.sav.dx != 0)                // turn right
+        case KEY_RIGHT: if (player.sav.dx != 0)                // turn right
             {
                 player.sav.dy = player.sav.dx;
                 player.sav.dx = 0;
@@ -235,37 +235,37 @@ int rundungeon(charsave &player, akworld &w)
                 player.sav.dy = 0;
             }
             w.drawdungeon(player.sav);
-            textout(screen, font, "Turn Right   ", 8, 167, 11);
+            textout(screen, font, "Turn Right   ", 8, 167, CLR_LIGHTCYAN);
             break;
-        case 155:                               // Alt+Left: strafe left
-            if (w.dng[player.sav.px + player.sav.dy][player.sav.py - player.sav.dx] != 1 & w.dng[player.sav.px + player.sav.dy][player.sav.py - player.sav.dx] < 10)
+        case SC_ALT_LEFT:                               // Alt+Left: strafe left
+            if (w.dng[player.sav.px + player.sav.dy][player.sav.py - player.sav.dx] != DG_WALL & w.dng[player.sav.px + player.sav.dy][player.sav.py - player.sav.dx] < DG_MONSTER)
             {
                 player.sav.px = player.sav.px + player.sav.dy;
                 player.sav.py = player.sav.py - player.sav.dx;
                 w.drawdungeon(player.sav);
-                textout(screen, font, "Strafe Left ", 8, 167, 11);
+                textout(screen, font, "Strafe Left ", 8, 167, CLR_LIGHTCYAN);
             }
             else
                 w.drawdungeon(player.sav);
             break;
-        case 157:                               // Alt+Right: strafe right
-            if (w.dng[player.sav.px - player.sav.dy][player.sav.py + player.sav.dx] != 1 & w.dng[player.sav.px - player.sav.dy][player.sav.py + player.sav.dx] < 10)
+        case SC_ALT_RIGHT:                               // Alt+Right: strafe right
+            if (w.dng[player.sav.px - player.sav.dy][player.sav.py + player.sav.dx] != DG_WALL & w.dng[player.sav.px - player.sav.dy][player.sav.py + player.sav.dx] < DG_MONSTER)
             {
                 player.sav.px = player.sav.px - player.sav.dy;
                 player.sav.py = player.sav.py + player.sav.dx;
                 w.drawdungeon(player.sav);
-                textout(screen, font, "Strafe Right", 8, 167, 11);
+                textout(screen, font, "Strafe Right", 8, 167, CLR_LIGHTCYAN);
             }
             else
                 w.drawdungeon(player.sav);
             break;
-        case 160:                               // Alt+Down: retreat
-            if (w.dng[player.sav.px - player.sav.dx][player.sav.py - player.sav.dy] != 1 & w.dng[player.sav.px - player.sav.dx][player.sav.py - player.sav.dy] < 10)
+        case SC_ALT_DOWN:                               // Alt+Down: retreat
+            if (w.dng[player.sav.px - player.sav.dx][player.sav.py - player.sav.dy] != DG_WALL & w.dng[player.sav.px - player.sav.dx][player.sav.py - player.sav.dy] < DG_MONSTER)
             {
                 player.sav.px = player.sav.px - player.sav.dx;
                 player.sav.py = player.sav.py - player.sav.dy;
                 w.drawdungeon(player.sav);
-                textout(screen, font, "Retreat     ", 8, 167, 11);
+                textout(screen, font, "Retreat     ", 8, 167, CLR_LIGHTCYAN);
             }
             else
                 w.drawdungeon(player.sav);
@@ -278,31 +278,31 @@ int rundungeon(charsave &player, akworld &w)
         case 'k':
         case 'E':
         case 'e':
-            if (w.dng[player.sav.px][player.sav.py] == 7 | w.dng[player.sav.px][player.sav.py] == 9)
+            if (w.dng[player.sav.px][player.sav.py] == DG_LADDER_DOWN | w.dng[player.sav.px][player.sav.py] == DG_HOLE)
             {
                 player.sav.inout++;
-                textout(screen, font, "Ladder Down  ", 8, 167, 11);
-                textout(screen, font, "You are on Level ", 8, 175, 11);
+                textout(screen, font, "Ladder Down  ", 8, 167, CLR_LIGHTCYAN);
+                textout(screen, font, "You are on Level ", 8, 175, CLR_LIGHTCYAN);
                 itoa(player.sav.inout, string, 10);
-                textout(screen, font, string, 144, 175, 11);
-                return 0;
+                textout(screen, font, string, 144, 175, CLR_LIGHTCYAN);
+                return GAME_NEXT;
             }
-            if (w.dng[player.sav.px][player.sav.py] == 8 & player.sav.inout == 1)
+            if (w.dng[player.sav.px][player.sav.py] == DG_LADDER_UP & player.sav.inout == 1)
             {
                 player.sav.inout = 0;
-                player.sav.character[0] = player.sav.character[0] + player.sav.lk;
+                player.sav.character[ST_HP] = player.sav.character[ST_HP] + player.sav.lk;
 
-                textout(screen, font, "Exit Dungeon ", 8, 167, 11);
-                return 0;
+                textout(screen, font, "Exit Dungeon ", 8, 167, CLR_LIGHTCYAN);
+                return GAME_NEXT;
             }
-            if (w.dng[player.sav.px][player.sav.py] == 8)
+            if (w.dng[player.sav.px][player.sav.py] == DG_LADDER_UP)
             {
                 player.sav.inout--;
-                textout(screen, font, "Ladder Up    ", 8, 167, 11);
-                textout(screen, font, "You are on Level ", 8, 175, 11);
+                textout(screen, font, "Ladder Up    ", 8, 167, CLR_LIGHTCYAN);
+                textout(screen, font, "You are on Level ", 8, 175, CLR_LIGHTCYAN);
                 itoa(player.sav.inout, string, 10);
-                textout(screen, font, string, 144, 175, 11);
-                return 0;
+                textout(screen, font, string, 144, 175, CLR_LIGHTCYAN);
+                return GAME_NEXT;
             }
             break;
         case 'A':
@@ -317,12 +317,12 @@ int rundungeon(charsave &player, akworld &w)
             break;
         case 'Q':
         case 'q':
-        case 19:                                // Ctrl-S
-            textout(screen, font, "Can Not Save in Dungeons!", 8, 175, 9);
+        case CTRL_S:                                // Ctrl-S
+            textout(screen, font, "Can Not Save in Dungeons!", 8, 175, CLR_LIGHTBLUE);
             break;
-        case 18:                                // Ctrl-R
+        case CTRL_R:                                // Ctrl-R
             player.loadgame();
-            return 0;
+            return GAME_NEXT;
         // The debug information has no statement on the 13 lines from here to case 'y'.
 
 
@@ -340,9 +340,9 @@ int rundungeon(charsave &player, akworld &w)
         case ' ': w.drawdungeon(player.sav);
             break;
         }
-        if (ky1 == 72 | ky1 == 157 | ky1 == 155 | ky1 == 160)   // the player moved
+        if (ky1 == KEY_UP | ky1 == SC_ALT_RIGHT | ky1 == SC_ALT_LEFT | ky1 == SC_ALT_DOWN)   // the player moved
         {
-            if (w.dng[player.sav.px][player.sav.py] == 2)       // a trap
+            if (w.dng[player.sav.px][player.sav.py] == DG_TRAP)       // a trap
             {
                 for (i = 2000; i > 999; i -= 5)
                 {
@@ -350,53 +350,53 @@ int rundungeon(charsave &player, akworld &w)
                     rest(4);
                 }
                 sound(0);
-                player.sav.character[0] = player.sav.character[0] - (rand() % player.sav.inout + 3);
+                player.sav.character[ST_HP] = player.sav.character[ST_HP] - (rand() % player.sav.inout + 3);
                 player.sav.inout++;
                 w.drawdungeon(player.sav);
-                textout(screen, font, "AAARRRGGGHHH!!!! A Trap!", 8, 175, 12);
-                textout(screen, font, "Falling to Level ", 8, 183, 11);
+                textout(screen, font, "AAARRRGGGHHH!!!! A Trap!", 8, 175, CLR_LIGHTRED);
+                textout(screen, font, "Falling to Level ", 8, 183, CLR_LIGHTCYAN);
                 itoa(player.sav.inout, string, 10);
-                textout(screen, font, string, 144, 183, 9);
-                return 0;
+                textout(screen, font, string, 144, 183, CLR_LIGHTBLUE);
+                return GAME_NEXT;
             }
-            if (w.dng[player.sav.px][player.sav.py] == 5)       // gold
+            if (w.dng[player.sav.px][player.sav.py] == DG_CHEST)       // gold
             {
-                w.dng[player.sav.px][player.sav.py] = 0;
+                w.dng[player.sav.px][player.sav.py] = DG_FLOOR;
                 w.drawdungeon(player.sav);
                 sound(2000);
                 rest(500);
                 sound(0);
-                textout(screen, font, "Gold!         ", 8, 167, 11);
+                textout(screen, font, "Gold!         ", 8, 167, CLR_LIGHTCYAN);
                 gold = floor(rand() % (player.sav.inout * 5) + player.sav.inout);
                 itoa(gold, string, 10);
-                textout(screen, font, string, 8, 175, 11);
-                textout(screen, font, "-Pieces of Eight", strlen(string) * 8 + 8, 175, 11);
-                player.sav.character[5] = player.sav.character[5] + gold;
+                textout(screen, font, string, 8, 175, CLR_LIGHTCYAN);
+                textout(screen, font, "-Pieces of Eight", strlen(string) * 8 + 8, 175, CLR_LIGHTCYAN);
+                player.sav.character[ST_GOLD] = player.sav.character[ST_GOLD] + gold;
                 if (gold > 0)
                 {
                     gold = floor(rand() % 6);
-                    textout(screen, font, "and a ", 8, 183, 11);
-                    textout(screen, font, item[gold], 56, 183, 9);
+                    textout(screen, font, "and a ", 8, 183, CLR_LIGHTCYAN);
+                    textout(screen, font, item[gold], 56, 183, CLR_LIGHTBLUE);
                     player.sav.owned[gold]++;
                 }
             }
         }
         if (player.sav.dx == -1)
-            textout(screen, font, "North", 140, 167, 11);
+            textout(screen, font, "North", 140, 167, CLR_LIGHTCYAN);
         if (player.sav.dx == 1)
-            textout(screen, font, "South", 140, 167, 11);
+            textout(screen, font, "South", 140, 167, CLR_LIGHTCYAN);
         if (player.sav.dy == -1)
-            textout(screen, font, "East ", 140, 167, 11);
+            textout(screen, font, "East ", 140, 167, CLR_LIGHTCYAN);
         if (player.sav.dy == 1)
-            textout(screen, font, "West ", 140, 167, 11);
+            textout(screen, font, "West ", 140, 167, CLR_LIGHTCYAN);
         w.movemonsters(player.sav);
         w.mdraw = 1;
         w.drawdungeon(player.sav);
         w.mdraw = 0;
         result = player.checkstatus();
-        if (result == 2) return 2;
+        if (result == GAME_DEAD) return GAME_DEAD;
     }
-    return 1;
+    return GAME_OVER;
 }
 
 // The menu, then the world map and the dungeons in turn until the game ends; a death goes back
@@ -440,29 +440,29 @@ start:
     result = 0;
     r2 = 0;
 
-    while (result != 2 & result != 4)
+    while (result != MENU_CREATE & result != MENU_JOURNEY)
     {
         w.backmid = load_midi("intro.mid");
         play_midi(w.backmid, -1);
         result = menu.runmenu(item);
         switch (result) {
-        case 1:
+        case MENU_INTRO:
             aux.instruct();
             break;
-        case 3:
+        case MENU_THANKS:
             destroy_midi(w.backmid);
             aux.shoutouts();
             break;
-        case 4:
+        case MENU_JOURNEY:
             r2 = player.loadgame();
 
-            if (r2 == 1) result = 2;
+            if (r2 == 1) result = MENU_CREATE;
             break;
-        case 5:
+        case MENU_QUOTES:
             destroy_midi(w.backmid);
             aux.quotes();
             break;
-        case 6:                                 // View Ending: Lord British's last speech
+        case MENU_ENDING:                                 // View Ending: Lord British's last speech
             clear(screen);
             player.sav.visit = 2;
             player.sav.task = -10;
@@ -473,7 +473,7 @@ start:
             break;
         }
     }
-    if (result == 2)                            // Create a Character
+    if (result == MENU_CREATE)                          // Create a Character
     {
         player.charcreate();
         w.backmid = load_midi("shop.mid");
@@ -486,7 +486,7 @@ start:
     clear(screen);
 
     result = 0;
-    while (result == 0)
+    while (result == GAME_NEXT)
     {
         if (player.sav.inout == 0)
         {
@@ -504,7 +504,7 @@ start:
             result = rundungeon(player, w);
             destroy_midi(w.backmid);
         }
-        if (result == 2) goto start;
+        if (result == GAME_DEAD) goto start;
     }
     text_mode(0);
 }

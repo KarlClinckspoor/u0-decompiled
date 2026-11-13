@@ -9,69 +9,70 @@
 #include <allegro.h>
 #include "akchar.h"
 #include "akworld.h"
+#include "akdefs.h"
 
 // The perspective tables for the 3-D dungeon view. xx/yy are the half-width and half-height
 // of the corridor at each distance (the Apple's 280x160 view scaled to 320x166); per, cd, ld,
 // ft and lad are the corners of walls, doors, ladders and so on at each distance.
 akworld::akworld()
 {
-    int w;
-    int x;
+    int side;
+    int dist;
     int y;
 
     worldbmp = create_sub_bitmap(screen, 0, 0, 320, 166);
     xx[0] = 159;
     yy[0] = 83;
-    for (x = 1; x <= 10; x++)
+    for (dist = 1; dist <= 10; dist++)
     {
-        xx[x] = floor(atan(1 / (x * 2.0)) / .785398 * 140 + .5);
-        yy[x] = floor(xx[x] * 4.0 / 7);
-        xx[x] = floor(xx[x] / 279.0 * 320);
-        yy[x] = floor(yy[x] / 159.0 * 166);
-        per[x][0] = 159 - xx[x];
-        per[x][1] = 159 + xx[x];
-        per[x][2] = 83 - yy[x];
-        per[x][3] = 83 + yy[x];
+        xx[dist] = floor(atan(1 / (dist * 2.0)) / .785398 * 140 + .5);
+        yy[dist] = floor(xx[dist] * 4.0 / 7);
+        xx[dist] = floor(xx[dist] / 279.0 * 320);
+        yy[dist] = floor(yy[dist] / 159.0 * 166);
+        per[dist][0] = 159 - xx[dist];
+        per[dist][1] = 159 + xx[dist];
+        per[dist][2] = 83 - yy[dist];
+        per[dist][3] = 83 + yy[dist];
     }
     per[0][0] = 0;
     per[0][1] = 319;
     per[0][2] = 0;
     per[0][3] = 166;
-    for (x = 1; x <= 10; x++)
+    for (dist = 1; dist <= 10; dist++)
     {
-        cd[x][0] = 159 - (int)(xx[x] / 3.0);
-        cd[x][1] = 159 + (int)(xx[x] / 3.0);
-        cd[x][2] = 83 - (int)(yy[x] * .7);
-        cd[x][3] = 83 + yy[x];
+        cd[dist][0] = 159 - (int)(xx[dist] / 3.0);
+        cd[dist][1] = 159 + (int)(xx[dist] / 3.0);
+        cd[dist][2] = 83 - (int)(yy[dist] * .7);
+        cd[dist][3] = 83 + yy[dist];
     }
-    for (x = 0; x <= 9; x++)
+    for (dist = 0; dist <= 9; dist++)
     {
-        ld[x][0] = (per[x][0] * 2 + per[x + 1][0]) / 3;
-        ld[x][1] = (per[x][0] + 2 * per[x + 1][0]) / 3;
-        w = ld[x][0] - per[x][0];
-        ld[x][2] = per[x][2] + w * 4 / 7;
-        ld[x][3] = per[x][2] + 2 * w * 4 / 7;
-        ld[x][4] = (per[x][3] * 2 + per[x + 1][3]) / 3;
-        ld[x][5] = (per[x][3] + 2 * per[x + 1][3]) / 3;
-        ld[x][2] = ld[x][4] - (ld[x][4] - ld[x][2]) * .8;
-        ld[x][3] = ld[x][5] - (ld[x][5] - ld[x][3]) * .8;
-        if (ld[x][3] == ld[x][4]) ld[x][3] = ld[x][3] - 1;
+        ld[dist][0] = (per[dist][0] * 2 + per[dist + 1][0]) / 3;
+        ld[dist][1] = (per[dist][0] + 2 * per[dist + 1][0]) / 3;
+        side = ld[dist][0] - per[dist][0];
+        ld[dist][2] = per[dist][2] + side * 4 / 7;
+        ld[dist][3] = per[dist][2] + 2 * side * 4 / 7;
+        ld[dist][4] = (per[dist][3] * 2 + per[dist + 1][3]) / 3;
+        ld[dist][5] = (per[dist][3] + 2 * per[dist + 1][3]) / 3;
+        ld[dist][2] = ld[dist][4] - (ld[dist][4] - ld[dist][2]) * .8;
+        ld[dist][3] = ld[dist][5] - (ld[dist][5] - ld[dist][3]) * .8;
+        if (ld[dist][3] == ld[dist][4]) ld[dist][3] = ld[dist][3] - 1;
     }
-    for (x = 0; x <= 9; x++)
+    for (dist = 0; dist <= 9; dist++)
     {
-        ft[x][0] = 159 - xx[x] / 3;
-        ft[x][1] = 159 + xx[x] / 3;
-        ft[x][2] = 159 - xx[x + 1] / 3;
-        ft[x][3] = 159 + xx[x + 1] / 3;
-        ft[x][4] = 83 + (yy[x] * 2 + yy[x + 1]) / 3;
-        ft[x][5] = 83 + (yy[x] + 2 * yy[x + 1]) / 3;
+        ft[dist][0] = 159 - xx[dist] / 3;
+        ft[dist][1] = 159 + xx[dist] / 3;
+        ft[dist][2] = 159 - xx[dist + 1] / 3;
+        ft[dist][3] = 159 + xx[dist + 1] / 3;
+        ft[dist][4] = 83 + (yy[dist] * 2 + yy[dist + 1]) / 3;
+        ft[dist][5] = 83 + (yy[dist] + 2 * yy[dist + 1]) / 3;
     }
-    for (x = 0; x <= 9; x++)
+    for (dist = 0; dist <= 9; dist++)
     {
-        lad[x][0] = (ft[x][0] * 2 + ft[x][1]) / 3;
-        lad[x][1] = (ft[x][0] + 2 * ft[x][1]) / 3;
-        lad[x][3] = ft[x][4];
-        lad[x][2] = 166 - lad[x][3];
+        lad[dist][0] = (ft[dist][0] * 2 + ft[dist][1]) / 3;
+        lad[dist][1] = (ft[dist][0] + 2 * ft[dist][1]) / 3;
+        lad[dist][3] = ft[dist][4];
+        lad[dist][2] = 166 - lad[dist][3];
     }
 }
 
@@ -88,30 +89,30 @@ int akworld::createworld(int mode, charsave::savestruct &player)
 
     clear(screen);
     srandom(player.ln);
-    textout(screen, font, "Welcome to Akalabeth, World of Doom!", 16, 96, 11);
-    textout(screen, font, "(Please Wait)", 24, 184, 11);
+    textout(screen, font, "Welcome to Akalabeth, World of Doom!", 16, 96, CLR_LIGHTCYAN);
+    textout(screen, font, "(Please Wait)", 24, 184, CLR_LIGHTCYAN);
     for (x = 0; x <= 20; x++)
     {
-        world[x][0] = 1;
-        world[0][x] = 1;
-        world[x][20] = 1;
-        world[20][x] = 1;
+        world[x][0] = LAND_MOUNTAINS;
+        world[0][x] = LAND_MOUNTAINS;
+        world[x][20] = LAND_MOUNTAINS;
+        world[20][x] = LAND_MOUNTAINS;
     }
     for (x = 1; x <= 19; x++)
         for (y = 1; y <= 19; y++)
         {
             world[x][y] = floor(pow(random() % 100 * .01, 5) * 4.5);
-            if (world[x][y] == 3 & rand() % 100 > 50) world[x][y] = 3;
+            if (world[x][y] == LAND_TOWN & rand() % 100 > 50) world[x][y] = LAND_TOWN;
         }
-    world[(int)floor(random() % 100 * .01 * 19 + 1)][(int)floor(random() % 100 * .01 * 19 + 1)] = 5;
+    world[(int)floor(random() % 100 * .01 * 19 + 1)][(int)floor(random() % 100 * .01 * 19 + 1)] = LAND_CASTLE;
     if (mode == 0)
     {
         player.tx = floor(random() % 100 * .01 * 19 + 1);
         player.ty = floor(random() % 100 * .01 * 19 + 1);
-        world[player.tx][player.ty] = 3;
+        world[player.tx][player.ty] = LAND_TOWN;
     }
     else
-        world[(int)floor(random() % 100 * .01 * 19 + 1)][(int)floor(random() % 100 * .01 * 19 + 1)] = 3;
+        world[(int)floor(random() % 100 * .01 * 19 + 1)][(int)floor(random() % 100 * .01 * 19 + 1)] = LAND_TOWN;
     return 0;
 }
 
@@ -121,9 +122,9 @@ int akworld::drawworld(charsave::savestruct &player)
 {
     int x;
     int y;
-    int m;
-    int x1;
-    int y1;
+    int land;
+    int left;
+    int top;
 
     clear(worldbmp);
     for (y = -1; y <= 1; y++)
@@ -131,49 +132,49 @@ int akworld::drawworld(charsave::savestruct &player)
         {
             if (player.inout == 0)
             {
-                line(worldbmp, 140, 78, 144, 78, 11);
-                line(worldbmp, 142, 76, 142, 80, 11);
+                line(worldbmp, 140, 78, 144, 78, CLR_LIGHTCYAN);
+                line(worldbmp, 142, 76, 142, 80, CLR_LIGHTCYAN);
             }
-            m = world[player.tx + x][player.ty + y];
-            x1 = (x + 1) * 58 + 55;
-            y1 = (y + 1) * 52;
-            switch (m) {
-            case 1:
-                line(worldbmp, x1 + 12, y1 + 53, x1 + 12, y1 + 42, 11);
-                line(worldbmp, x1 + 12, y1 + 42, x1 + 23, y1 + 31, 11);
-                line(worldbmp, x1 + 23, y1 + 31, x1 + 46, y1 + 31, 11);
-                line(worldbmp, x1 + 46, y1 + 31, x1 + 46, y1 + 53, 11);
-                line(worldbmp, x1, y1 + 10, x1 + 12, y1 + 10, 11);
-                line(worldbmp, x1 + 58, y1 + 10, x1 + 46, y1 + 10, 11);
-                line(worldbmp, x1, y1 + 42, x1 + 12, y1 + 42, 11);
-                line(worldbmp, x1 + 46, y1 + 42, x1 + 58, y1 + 42, 11);
-                line(worldbmp, x1 + 12, y1, x1 + 12, y1 + 21, 11);
-                line(worldbmp, x1 + 12, y1 + 21, x1 + 23, y1 + 21, 11);
-                line(worldbmp, x1 + 23, y1 + 21, x1 + 23, y1 + 31, 11);
-                line(worldbmp, x1 + 23, y1 + 31, x1 + 35, y1 + 31, 11);
-                line(worldbmp, x1 + 35, y1 + 31, x1 + 35, y1 + 11, 11);
-                line(worldbmp, x1 + 35, y1 + 10, x1 + 46, y1 + 10, 11);
-                line(worldbmp, x1 + 46, y1 + 10, x1 + 46, y1, 11);
+            land = world[player.tx + x][player.ty + y];
+            left = (x + 1) * 58 + 55;
+            top = (y + 1) * 52;
+            switch (land) {
+            case LAND_MOUNTAINS:
+                line(worldbmp, left + 12, top + 53, left + 12, top + 42, CLR_LIGHTCYAN);
+                line(worldbmp, left + 12, top + 42, left + 23, top + 31, CLR_LIGHTCYAN);
+                line(worldbmp, left + 23, top + 31, left + 46, top + 31, CLR_LIGHTCYAN);
+                line(worldbmp, left + 46, top + 31, left + 46, top + 53, CLR_LIGHTCYAN);
+                line(worldbmp, left, top + 10, left + 12, top + 10, CLR_LIGHTCYAN);
+                line(worldbmp, left + 58, top + 10, left + 46, top + 10, CLR_LIGHTCYAN);
+                line(worldbmp, left, top + 42, left + 12, top + 42, CLR_LIGHTCYAN);
+                line(worldbmp, left + 46, top + 42, left + 58, top + 42, CLR_LIGHTCYAN);
+                line(worldbmp, left + 12, top, left + 12, top + 21, CLR_LIGHTCYAN);
+                line(worldbmp, left + 12, top + 21, left + 23, top + 21, CLR_LIGHTCYAN);
+                line(worldbmp, left + 23, top + 21, left + 23, top + 31, CLR_LIGHTCYAN);
+                line(worldbmp, left + 23, top + 31, left + 35, top + 31, CLR_LIGHTCYAN);
+                line(worldbmp, left + 35, top + 31, left + 35, top + 11, CLR_LIGHTCYAN);
+                line(worldbmp, left + 35, top + 10, left + 46, top + 10, CLR_LIGHTCYAN);
+                line(worldbmp, left + 46, top + 10, left + 46, top, CLR_LIGHTCYAN);
                 break;
-            case 2:
-                rect(worldbmp, x1 + 23, y1 + 21, x1 + 35, y1 + 31, 11);
+            case LAND_TREE:
+                rect(worldbmp, left + 23, top + 21, left + 35, top + 31, CLR_LIGHTCYAN);
                 break;
-            case 3:
-                rect(worldbmp, x1 + 11, y1 + 10, x1 + 23, y1 + 21, 11);
-                rect(worldbmp, x1 + 35, y1 + 10, x1 + 46, y1 + 21, 11);
-                rect(worldbmp, x1 + 23, y1 + 21, x1 + 35, y1 + 31, 11);
-                rect(worldbmp, x1 + 11, y1 + 31, x1 + 23, y1 + 43, 11);
-                rect(worldbmp, x1 + 35, y1 + 31, x1 + 46, y1 + 43, 11);
+            case LAND_TOWN:
+                rect(worldbmp, left + 11, top + 10, left + 23, top + 21, CLR_LIGHTCYAN);
+                rect(worldbmp, left + 35, top + 10, left + 46, top + 21, CLR_LIGHTCYAN);
+                rect(worldbmp, left + 23, top + 21, left + 35, top + 31, CLR_LIGHTCYAN);
+                rect(worldbmp, left + 11, top + 31, left + 23, top + 43, CLR_LIGHTCYAN);
+                rect(worldbmp, left + 35, top + 31, left + 46, top + 43, CLR_LIGHTCYAN);
                 break;
-            case 4:
-                line(worldbmp, x1 + 23, y1 + 21, x1 + 34, y1 + 31, 11);
-                line(worldbmp, x1 + 23, y1 + 31, x1 + 34, y1 + 21, 11);
+            case LAND_DUNGEON:
+                line(worldbmp, left + 23, top + 21, left + 34, top + 31, CLR_LIGHTCYAN);
+                line(worldbmp, left + 23, top + 31, left + 34, top + 21, CLR_LIGHTCYAN);
                 break;
-            case 5:
-                rect(worldbmp, x1, y1, x1 + 58, y1 + 53, 11);
-                rect(worldbmp, x1 + 12, y1 + 10, x1 + 46, y1 + 42, 11);
-                line(worldbmp, x1 + 12, y1 + 10, x1 + 46, y1 + 42, 11);
-                line(worldbmp, x1 + 46, y1 + 10, x1 + 12, y1 + 42, 11);
+            case LAND_CASTLE:
+                rect(worldbmp, left, top, left + 58, top + 53, CLR_LIGHTCYAN);
+                rect(worldbmp, left + 12, top + 10, left + 46, top + 42, CLR_LIGHTCYAN);
+                line(worldbmp, left + 12, top + 10, left + 46, top + 42, CLR_LIGHTCYAN);
+                line(worldbmp, left + 46, top + 10, left + 12, top + 42, CLR_LIGHTCYAN);
                 break;
             }
         }
@@ -191,49 +192,49 @@ int akworld::createdungeon(charsave::savestruct &player)
     srandom(player.ln * 3 + player.inout);
     for (x = 0; x <= 10; x++)
         for (y = 0; y <= 10; y++)
-            dng[x][y] = 0;
+            dng[x][y] = DG_FLOOR;
     for (x = 0; x <= 10; x++)
     {
-        dng[x][0] = 1;
-        dng[x][10] = 1;
-        dng[0][x] = 1;
-        dng[10][x] = 1;
+        dng[x][0] = DG_WALL;
+        dng[x][10] = DG_WALL;
+        dng[0][x] = DG_WALL;
+        dng[10][x] = DG_WALL;
     }
     for (x = 2; x <= 8; x += 2)
         for (y = 1; y <= 9; y++)
         {
-            dng[x][y] = 1;
-            dng[y][x] = 1;
+            dng[x][y] = DG_WALL;
+            dng[y][x] = DG_WALL;
         }
     for (x = 2; x <= 8; x += 2)
         for (y = 1; y <= 9; y += 2)
         {
-            if (random() % 100 > 95) dng[x][y] = 2;
-            if (random() % 100 > 95) dng[y][x] = 2;
-            if (random() % 100 > 70) dng[x][y] = 3;
-            if (random() % 100 > 70) dng[y][x] = 3;
-            if (random() % 100 > 40) dng[x][y] = 4;
-            if (random() % 100 > 40) dng[y][x] = 4;
-            if (random() % 100 > 97) dng[y][x] = 9;
-            if (random() % 100 > 97) dng[x][y] = 9;
-            if (random() % 100 > 94) dng[x][y] = 5;
-            if (random() % 100 > 94) dng[y][x] = 5;
+            if (random() % 100 > 95) dng[x][y] = DG_TRAP;
+            if (random() % 100 > 95) dng[y][x] = DG_TRAP;
+            if (random() % 100 > 70) dng[x][y] = DG_HIDDEN_DOOR;
+            if (random() % 100 > 70) dng[y][x] = DG_HIDDEN_DOOR;
+            if (random() % 100 > 40) dng[x][y] = DG_DOOR;
+            if (random() % 100 > 40) dng[y][x] = DG_DOOR;
+            if (random() % 100 > 97) dng[y][x] = DG_HOLE;
+            if (random() % 100 > 97) dng[x][y] = DG_HOLE;
+            if (random() % 100 > 94) dng[x][y] = DG_CHEST;
+            if (random() % 100 > 94) dng[y][x] = DG_CHEST;
         }
-    dng[2][1] = 0;
+    dng[2][1] = DG_FLOOR;
     if (player.inout / 2.0 == floor(player.inout / 2.0))
     {
-        dng[7][3] = 7;
-        dng[3][7] = 8;
+        dng[7][3] = DG_LADDER_DOWN;
+        dng[3][7] = DG_LADDER_UP;
     }
     else
     {
-        dng[7][3] = 8;
-        dng[3][7] = 7;
+        dng[7][3] = DG_LADDER_UP;
+        dng[3][7] = DG_LADDER_DOWN;
     }
     if (player.inout == 1)
     {
-        dng[1][1] = 8;
-        dng[7][3] = 0;
+        dng[1][1] = DG_LADDER_UP;
+        dng[7][3] = DG_FLOOR;
     }
     return 0;
 }
@@ -244,95 +245,95 @@ int akworld::createdungeon(charsave::savestruct &player)
 // the corridor there and l2/r2/t2/b2 the far ones. With mdraw set the monsters are drawn too.
 int akworld::drawdungeon(charsave::savestruct &player)
 {
-    int bl, tl, ll, rl;
-    int y1, y2, y3, y4;
-    int cent, left, right;
+    int lbottom, ltop, lleft, lright;
+    int rung1, rung2, rung3, rung4;
+    int ahead, left, right;
     int l1, l2, r1, r2, b1, b2, t1, t2;
-    int mon;
-    int en = 0;
-    int l = 0;
+    int mtype;
+    int stop = 0;
+    int dist = 0;
 
     color = player.inout + 30;
     char *monster[] = {"", "Skeleton", "Thief", "Giant Rat", "Orc", "Viper", "Carrion Crawler",
                        "Gremlin", "Mimic", "Daemon", "Balrog"};
     if (mdraw == 0) clear(worldbmp);
-    while (en != 1)
+    while (stop != 1)
     {
-        cent = floor(dng[player.px + player.dx * l][player.py + player.dy * l]);
-        left = floor(dng[player.px + player.dx * l + player.dy][player.py + player.dy * l - player.dx]);
-        right = floor(dng[player.px + player.dx * l - player.dy][player.py + player.dy * l + player.dx]);
-        mon = floor(cent / 10);
-        cent = cent - mon * 10;
-        l1 = per[l][0];
-        r1 = per[l][1];
-        t1 = per[l][2];
-        b1 = per[l][3];
-        l2 = per[l + 1][0];
-        r2 = per[l + 1][1];
-        t2 = per[l + 1][2];
-        b2 = per[l + 1][3];
+        ahead = floor(dng[player.px + player.dx * dist][player.py + player.dy * dist]);
+        left = floor(dng[player.px + player.dx * dist + player.dy][player.py + player.dy * dist - player.dx]);
+        right = floor(dng[player.px + player.dx * dist - player.dy][player.py + player.dy * dist + player.dx]);
+        mtype = floor(ahead / DG_MONSTER);
+        ahead = ahead - mtype * DG_MONSTER;
+        l1 = per[dist][0];
+        r1 = per[dist][1];
+        t1 = per[dist][2];
+        b1 = per[dist][3];
+        l2 = per[dist + 1][0];
+        r2 = per[dist + 1][1];
+        t2 = per[dist + 1][2];
+        b2 = per[dist + 1][3];
         if (mdraw == 1)
-            if (mon > 0)
+            if (mtype > 0)
             {
-                if (l > 1)
+                if (dist > 1)
                 {
-                    if (mon != 8)
-                        textout(screen, font, monster[mon], 225, 167, 13);
+                    if (mtype != MON_MIMIC)
+                        textout(screen, font, monster[mtype], 225, 167, CLR_LIGHTMAGENTA);
                     else
-                        textout(screen, font, "Chest!      ", 226, 167, 13);
+                        textout(screen, font, "Chest!      ", 226, 167, CLR_LIGHTMAGENTA);
                 }
-                drawmonsters(mon, l);
+                drawmonsters(mtype, dist);
             }
-        if (cent != 1 & cent != 3 & cent != 4)
+        if (ahead != DG_WALL & ahead != DG_HIDDEN_DOOR & ahead != DG_DOOR)
         {
-            if (left == 1 | left == 3 | left == 4)
+            if (left == DG_WALL | left == DG_HIDDEN_DOOR | left == DG_DOOR)
             {
                 line(worldbmp, l1, t1, l2, t2, color);
                 line(worldbmp, l1, b1, l2, b2, color);
             }
-            if (right == 1 | right == 3 | right == 4)
+            if (right == DG_WALL | right == DG_HIDDEN_DOOR | right == DG_DOOR)
             {
                 line(worldbmp, r1, t1, r2, t2, color);
                 line(worldbmp, r1, b1, r2, b2, color);
             }
         }
-        if (l != 0)
+        if (dist != 0)
         {
-            if (cent == 1 | cent == 3 | cent == 4)
+            if (ahead == DG_WALL | ahead == DG_HIDDEN_DOOR | ahead == DG_DOOR)
             {
                 line(worldbmp, l1, t1, r1, t1, color);
                 line(worldbmp, r1, t1, r1, b1, color);
                 line(worldbmp, r1, b1, l1, b1, color);
                 line(worldbmp, l1, b1, l1, t1, color);
-                if (cent != 4) return 0;
+                if (ahead != DG_DOOR) return 0;
             }
-            if (cent == 4)
+            if (ahead == DG_DOOR)
             {
-                line(worldbmp, cd[l][0], cd[l][3], cd[l][0], cd[l][2], color);
-                line(worldbmp, cd[l][0], cd[l][2], cd[l][1], cd[l][2], color);
-                line(worldbmp, cd[l][1], cd[l][2], cd[l][1], cd[l][3], color);
+                line(worldbmp, cd[dist][0], cd[dist][3], cd[dist][0], cd[dist][2], color);
+                line(worldbmp, cd[dist][0], cd[dist][2], cd[dist][1], cd[dist][2], color);
+                line(worldbmp, cd[dist][1], cd[dist][2], cd[dist][1], cd[dist][3], color);
                 return 0;
             }
-            if (left == 4)
+            if (left == DG_DOOR)
             {
-                line(worldbmp, ld[l][0], ld[l][4], ld[l][0], ld[l][2], color);
-                line(worldbmp, ld[l][0], ld[l][2], ld[l][1], ld[l][3], color);
-                line(worldbmp, ld[l][1], ld[l][3], ld[l][1], ld[l][5], color);
+                line(worldbmp, ld[dist][0], ld[dist][4], ld[dist][0], ld[dist][2], color);
+                line(worldbmp, ld[dist][0], ld[dist][2], ld[dist][1], ld[dist][3], color);
+                line(worldbmp, ld[dist][1], ld[dist][3], ld[dist][1], ld[dist][5], color);
             }
-            if (right == 4)
+            if (right == DG_DOOR)
             {
-                line(worldbmp, 319 - ld[l][0], ld[l][4], 319 - ld[l][0], ld[l][2], color);
-                line(worldbmp, 319 - ld[l][0], ld[l][2], 319 - ld[l][1], ld[l][3], color);
-                line(worldbmp, 319 - ld[l][1], ld[l][3], 319 - ld[l][1], ld[l][5], color);
+                line(worldbmp, 319 - ld[dist][0], ld[dist][4], 319 - ld[dist][0], ld[dist][2], color);
+                line(worldbmp, 319 - ld[dist][0], ld[dist][2], 319 - ld[dist][1], ld[dist][3], color);
+                line(worldbmp, 319 - ld[dist][1], ld[dist][3], 319 - ld[dist][1], ld[dist][5], color);
             }
-            if (left != 1 & left != 3 & left != 4)
+            if (left != DG_WALL & left != DG_HIDDEN_DOOR & left != DG_DOOR)
             {
                 line(worldbmp, l1, t1, l1, b1, color);
                 line(worldbmp, l1, t2, l2, t2, color);
                 line(worldbmp, l2, t2, l2, b2, color);
                 line(worldbmp, l2, b2, l1, b2, color);
             }
-            if (right != 1 & right != 3 & right != 4)
+            if (right != DG_WALL & right != DG_HIDDEN_DOOR & right != DG_DOOR)
             {
                 line(worldbmp, r1, t1, r1, b1, color);
                 line(worldbmp, r1, t2, r2, t2, color);
@@ -342,25 +343,25 @@ int akworld::drawdungeon(charsave::savestruct &player)
         }
         else
         {
-            if (left == 4)
+            if (left == DG_DOOR)
             {
-                line(worldbmp, 0, ld[l][2] - 3, ld[l][1], ld[l][3], color);
-                line(worldbmp, ld[l][1], ld[l][3], ld[l][1], ld[l][5], color);
+                line(worldbmp, 0, ld[dist][2] - 3, ld[dist][1], ld[dist][3], color);
+                line(worldbmp, ld[dist][1], ld[dist][3], ld[dist][1], ld[dist][5], color);
             }
-            if (right == 4)
+            if (right == DG_DOOR)
             {
-                line(worldbmp, 319, ld[l][2] - 3, 319 - ld[l][1], ld[l][3], color);
-                line(worldbmp, 319 - ld[l][1], ld[l][3], 319 - ld[l][1], ld[l][5], color);
+                line(worldbmp, 319, ld[dist][2] - 3, 319 - ld[dist][1], ld[dist][3], color);
+                line(worldbmp, 319 - ld[dist][1], ld[dist][3], 319 - ld[dist][1], ld[dist][5], color);
             }
-            if (en != 1)
+            if (stop != 1)
             {
-                if (left != 1 & left != 3 & left != 4)
+                if (left != DG_WALL & left != DG_HIDDEN_DOOR & left != DG_DOOR)
                 {
                     line(worldbmp, l1, t2, l2, t2, color);
                     line(worldbmp, l2, t2, l2, b2, color);
                     line(worldbmp, l2, b2, l1, b2, color);
                 }
-                if (right != 1 & right != 3 & right != 4)
+                if (right != DG_WALL & right != DG_HIDDEN_DOOR & right != DG_DOOR)
                 {
                     line(worldbmp, r1, t2, r2, t2, color);
                     line(worldbmp, r2, t2, r2, b2, color);
@@ -368,51 +369,51 @@ int akworld::drawdungeon(charsave::savestruct &player)
                 }
             }
         }
-        if (cent == 7 | cent == 9)
+        if (ahead == DG_LADDER_DOWN | ahead == DG_HOLE)
         {
-            line(worldbmp, ft[l][0], ft[l][4], ft[l][2], ft[l][5], color);
-            line(worldbmp, ft[l][2], ft[l][5], ft[l][3], ft[l][5], color);
-            line(worldbmp, ft[l][3], ft[l][5], ft[l][1], ft[l][4], color);
-            line(worldbmp, ft[l][1], ft[l][4], ft[l][0], ft[l][4], color);
+            line(worldbmp, ft[dist][0], ft[dist][4], ft[dist][2], ft[dist][5], color);
+            line(worldbmp, ft[dist][2], ft[dist][5], ft[dist][3], ft[dist][5], color);
+            line(worldbmp, ft[dist][3], ft[dist][5], ft[dist][1], ft[dist][4], color);
+            line(worldbmp, ft[dist][1], ft[dist][4], ft[dist][0], ft[dist][4], color);
         }
-        if (cent == 8)
+        if (ahead == DG_LADDER_UP)
         {
-            line(worldbmp, ft[l][0], 166 - ft[l][4], ft[l][2], 166 - ft[l][5], color);
-            line(worldbmp, ft[l][2], 166 - ft[l][5], ft[l][3], 166 - ft[l][5], color);
-            line(worldbmp, ft[l][3], 166 - ft[l][5], ft[l][1], 166 - ft[l][4], color);
-            line(worldbmp, ft[l][1], 166 - ft[l][4], ft[l][0], 166 - ft[l][4], color);
+            line(worldbmp, ft[dist][0], 166 - ft[dist][4], ft[dist][2], 166 - ft[dist][5], color);
+            line(worldbmp, ft[dist][2], 166 - ft[dist][5], ft[dist][3], 166 - ft[dist][5], color);
+            line(worldbmp, ft[dist][3], 166 - ft[dist][5], ft[dist][1], 166 - ft[dist][4], color);
+            line(worldbmp, ft[dist][1], 166 - ft[dist][4], ft[dist][0], 166 - ft[dist][4], color);
         }
-        if (cent == 7 | cent == 8)
+        if (ahead == DG_LADDER_DOWN | ahead == DG_LADDER_UP)
         {
-            bl = lad[l][3];
-            tl = lad[l][2];
-            ll = lad[l][0];
-            rl = lad[l][1];
-            line(worldbmp, ll, bl, ll, tl, color);
-            line(worldbmp, rl, tl, rl, bl, color);
-            y1 = (bl * 4 + tl) / 5;
-            y2 = (bl * 3 + tl * 2) / 5;
-            y3 = (bl * 2 + tl * 3) / 5;
-            y4 = (bl + tl * 4) / 5;
-            line(worldbmp, ll, y1, rl, y1, color);
-            line(worldbmp, ll, y2, rl, y2, color);
-            line(worldbmp, ll, y3, rl, y3, color);
-            line(worldbmp, ll, y4, rl, y4, color);
+            lbottom = lad[dist][3];
+            ltop = lad[dist][2];
+            lleft = lad[dist][0];
+            lright = lad[dist][1];
+            line(worldbmp, lleft, lbottom, lleft, ltop, color);
+            line(worldbmp, lright, ltop, lright, lbottom, color);
+            rung1 = (lbottom * 4 + ltop) / 5;
+            rung2 = (lbottom * 3 + ltop * 2) / 5;
+            rung3 = (lbottom * 2 + ltop * 3) / 5;
+            rung4 = (lbottom + ltop * 4) / 5;
+            line(worldbmp, lleft, rung1, lright, rung1, color);
+            line(worldbmp, lleft, rung2, lright, rung2, color);
+            line(worldbmp, lleft, rung3, lright, rung3, color);
+            line(worldbmp, lleft, rung4, lright, rung4, color);
         }
-        if (cent == 5 & l != 0)
+        if (ahead == DG_CHEST & dist != 0)
         {
-            line(worldbmp, 159 - 11 / l, per[l][3], 159 - 11 / l, per[l][3] - 11 / l, color);
-            line(worldbmp, 159 - 11 / l, per[l][3] - 11 / l, 159 + 11 / l, per[l][3] - 11 / l, color);
-            line(worldbmp, 159 + 11 / l, per[l][3] - 11 / l, 159 + 11 / l, per[l][3], color);
-            line(worldbmp, 159 + 11 / l, per[l][3], 159 - 11 / l, per[l][3], color);
-            line(worldbmp, 159 - 11 / l, per[l][3] - 11 / l, 159 - 6 / l, per[l][3] - 15 / l, color);
-            line(worldbmp, 159 - 6 / l, per[l][3] - 15 / l, 159 + 16 / l, per[l][3] - 15 / l, color);
-            line(worldbmp, 159 + 16 / l, per[l][3] - 15 / l, 159 + 16 / l, per[l][3] - 6 / l, color);
-            line(worldbmp, 159 + 16 / l, per[l][3] - 6 / l, 159 + 11 / l, per[l][3], color);
-            line(worldbmp, 159 + 11 / l, per[l][3] - 11 / l, 159 + 16 / l, per[l][3] - 15 / l, color);
-            textout(screen, font, "Chest!", 225, 167, 13);
+            line(worldbmp, 159 - 11 / dist, per[dist][3], 159 - 11 / dist, per[dist][3] - 11 / dist, color);
+            line(worldbmp, 159 - 11 / dist, per[dist][3] - 11 / dist, 159 + 11 / dist, per[dist][3] - 11 / dist, color);
+            line(worldbmp, 159 + 11 / dist, per[dist][3] - 11 / dist, 159 + 11 / dist, per[dist][3], color);
+            line(worldbmp, 159 + 11 / dist, per[dist][3], 159 - 11 / dist, per[dist][3], color);
+            line(worldbmp, 159 - 11 / dist, per[dist][3] - 11 / dist, 159 - 6 / dist, per[dist][3] - 15 / dist, color);
+            line(worldbmp, 159 - 6 / dist, per[dist][3] - 15 / dist, 159 + 16 / dist, per[dist][3] - 15 / dist, color);
+            line(worldbmp, 159 + 16 / dist, per[dist][3] - 15 / dist, 159 + 16 / dist, per[dist][3] - 6 / dist, color);
+            line(worldbmp, 159 + 16 / dist, per[dist][3] - 6 / dist, 159 + 11 / dist, per[dist][3], color);
+            line(worldbmp, 159 + 11 / dist, per[dist][3] - 11 / dist, 159 + 16 / dist, per[dist][3] - 15 / dist, color);
+            textout(screen, font, "Chest!", 225, 167, CLR_LIGHTMAGENTA);
         }
-        l++;
+        dist++;
     }
 done:                                           // never jumped to
     return 0;
@@ -422,26 +423,26 @@ done:                                           // never jumped to
 // at a free square; its hit points (mz[x][1]) grow with the level of play and the depth.
 int akworld::createmonsters(charsave::savestruct &player)
 {
-    int nm = 0;
-    int x;
+    int count = 0;
+    int m;
 
-    for (x = 1; x <= 10; x++)
+    for (m = 1; m <= 10; m++)
     {
-        mz[x][0] = 0;
-        mz[x][1] = x + 3 + player.inout;
-        if (x - 2 < player.inout)
+        mz[m][0] = 0;
+        mz[m][1] = m + 3 + player.inout;
+        if (m - 2 < player.inout)
         {
-            ml[x][0] = floor(random() % 9 + 1);
-            ml[x][1] = floor(random() % 9 + 1);
-            while (dng[ml[x][0]][ml[x][1]] != 0 | (ml[x][0] == player.px & ml[x][1] == player.py))
+            ml[m][0] = floor(random() % 9 + 1);
+            ml[m][1] = floor(random() % 9 + 1);
+            while (dng[ml[m][0]][ml[m][1]] != DG_FLOOR | (ml[m][0] == player.px & ml[m][1] == player.py))
             {
-                ml[x][0] = floor(random() % 9 + 1);
-                ml[x][1] = floor(random() % 9 + 1);
+                ml[m][0] = floor(random() % 9 + 1);
+                ml[m][1] = floor(random() % 9 + 1);
             }
-            dng[ml[x][0]][ml[x][1]] = x * 10;
-            mz[x][0] = 1;
-            nm++;
-            mz[x][1] = x * 2 + player.inout * 2 + player.level;
+            dng[ml[m][0]][ml[m][1]] = m * DG_MONSTER;
+            mz[m][0] = 1;
+            count++;
+            mz[m][1] = m * 2 + player.inout * 2 + player.level;
         }
     }
     return 0;
@@ -460,7 +461,7 @@ int akworld::drawmonsters(int type, int dist)
     y = yy[dist] + 83;
     x = 159;
     switch (type) {
-    case 1:                                // skeleton
+    case MON_SKELETON:
         line(worldbmp, x - 27 / dist, y, x - 17 / dist, y, color);
         line(worldbmp, x - 17 / dist, y, x - 17 / dist, y - 16 / dist, color);
         line(worldbmp, x - 17 / dist, y - 16 / dist, x - 9 / dist, y - 31 / dist, color);
@@ -494,7 +495,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x + 9 / dist, y - 79 / dist, x + 6 / dist, y - 84 / dist, color);
         line(worldbmp, x + 6 / dist, y - 84 / dist, x - 6 / dist, y - 84 / dist, color);
         break;
-    case 2:                                // thief
+    case MON_THIEF:
         line(worldbmp, x, y - 59 / dist, x, y - 8 / dist, color);
         line(worldbmp, x, y - 8 / dist, x + 12 / dist, y, color);
         line(worldbmp, x + 12 / dist, y, x + 35 / dist, y, color);
@@ -515,7 +516,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x, y - 63 / dist, x + 12 / dist, y - 79 / dist, color);
         line(worldbmp, x + 12 / dist, y - 79 / dist, x + 12 / dist, y - 67 / dist, color);
         break;
-    case 3:                                // giant rat
+    case MON_GIANT_RAT:
         line(worldbmp, x + 6 / dist, y - 31 / dist, x, y - 26 / dist, color);
         line(worldbmp, x, y - 26 / dist, x - 6 / dist, y - 31 / dist, color);
         line(worldbmp, x - 6 / dist, y - 31 / dist, x - 17 / dist, y - 5 / dist, color);
@@ -537,7 +538,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x - 8 / dist, y - 21 / dist, x - 8 / dist, y - 16 / dist, color);
         line(worldbmp, x + 8 / dist, y - 21 / dist, x + 8 / dist, y - 16 / dist, color);
         break;
-    case 4:                                // orc
+    case MON_ORC:
         line(worldbmp, x, y, x - 17 / dist, y, color);
         line(worldbmp, x - 17 / dist, y, x - 9 / dist, y - 8 / dist, color);
         line(worldbmp, x - 9 / dist, y - 8 / dist, x - 9 / dist, y - 16 / dist, color);
@@ -577,7 +578,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x + 17 / dist, y - 47 / dist, x, y - 31 / dist, color);
         line(worldbmp, x, y - 31 / dist, x, y - 40 / dist, color);
         break;
-    case 5:                                // viper
+    case MON_VIPER:
         line(worldbmp, x - 16 / dist, y - 16 / dist, x - 12 / dist, y - 31 / dist, color);
         line(worldbmp, x - 12 / dist, y - 31 / dist, x - 17 / dist, y - 21 / dist, color);
         line(worldbmp, x - 17 / dist, y - 21 / dist, x - 17 / dist, y - 16 / dist, color);
@@ -608,7 +609,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x, y - 42 / dist, x - 17 / dist, y - 31 / dist, color);
         line(worldbmp, x - 17 / dist, y - 31 / dist, x - 6 / dist, y - 42 / dist, color);
         break;
-    case 6:                                // carrion crawler
+    case MON_CARRION_CRAWLER:
         line(worldbmp, x - 23 / dist, 83 - yy[dist], x - 23 / dist, y - 92 / dist, color);
         line(worldbmp, x - 23 / dist, y - 92 / dist, x - 12 / dist, y - 87 / dist, color);
         line(worldbmp, x - 12 / dist, y - 87 / dist, x + 12 / dist, y - 87 / dist, color);
@@ -636,7 +637,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x + 12 / dist, y - 71 / dist, x + 12 / dist, y - 66 / dist, color);
         line(worldbmp, x + 12 / dist, y - 66 / dist, x, y - 61 / dist, color);
         break;
-    case 7:                                // gremlin
+    case MON_GREMLIN:
         line(worldbmp, x + 6 / dist, y - 10 / dist, x - 6 / dist, y - 10 / dist, color);
         line(worldbmp, x - 6 / dist, y - 10 / dist, x, y - 15 / dist, color);
         line(worldbmp, x, y - 15 / dist, x + 12 / dist, y - 21 / dist, color);
@@ -652,10 +653,10 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x - 3 / dist, y - 3 / dist, x - 6 / dist, y, color);
         line(worldbmp, x - 6 / dist, y, x - 4 / dist, y, color);
         line(worldbmp, x + 4 / dist, y - 5 / dist, x - 4 / dist, y - 5 / dist, color);
-        putpixel(worldbmp, x + 4 / dist, y - 8 / dist, 15);
-        putpixel(worldbmp, x - 4 / dist, y - 8 / dist, 15);
+        putpixel(worldbmp, x + 4 / dist, y - 8 / dist, CLR_WHITE);
+        putpixel(worldbmp, x - 4 / dist, y - 8 / dist, CLR_WHITE);
         break;
-    case 8:                                // mimic
+    case MON_MIMIC:
         line(worldbmp, 159 - 11 / dist, per[dist][3], 159 - 11 / dist, per[dist][3] - 11 / dist, color);
         line(worldbmp, 159 - 11 / dist, per[dist][3] - 11 / dist, 159 + 11 / dist, per[dist][3] - 11 / dist, color);
         line(worldbmp, 159 + 11 / dist, per[dist][3] - 11 / dist, 159 + 11 / dist, per[dist][3], color);
@@ -666,7 +667,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, 159 + 16 / dist, per[dist][3] - 6 / dist, 159 + 11 / dist, per[dist][3], color);
         line(worldbmp, 159 + 11 / dist, per[dist][3] - 11 / dist, 159 + 16 / dist, per[dist][3] - 15 / dist, color);
         break;
-    case 9:                                // daemon
+    case MON_DAEMON:
         line(worldbmp, x - 16 / dist, y - 48 / dist, x - 14 / dist, y - 39 / dist, color);
         line(worldbmp, x - 14 / dist, y - 39 / dist, x - 23 / dist, y - 34 / dist, color);
         line(worldbmp, x - 23 / dist, y - 34 / dist, x - 35 / dist, y - 34 / dist, color);
@@ -751,7 +752,7 @@ int akworld::drawmonsters(int type, int dist)
         line(worldbmp, x + 32 / dist, y - 9 / dist, x + 23 / dist, y - 9 / dist, color);
         line(worldbmp, x + 23 / dist, y - 9 / dist, x + 7 / dist, y - 26 / dist, color);
         break;
-    case 10:                                // balrog
+    case MON_BALROG:
         line(worldbmp, x + 7 / dist, y - 63 / dist, x + 35 / dist, y - 94 / dist, color);
         line(worldbmp, x + 35 / dist, y - 94 / dist, x + 69 / dist, y - 31 / dist, color);
         line(worldbmp, x + 69 / dist, y - 31 / dist, x + 69 / dist, y - 10 / dist, color);
@@ -831,195 +832,195 @@ int akworld::drawmonsters(int type, int dist)
 // with bare hands. A mage chooses the amulet's spell, a fighter gets a random one.
 int akworld::attack(charsave::savestruct &player)
 {
-    int mn = 0;
-    int dam = 0;
+    int target = 0;
+    int damage = 0;
     int gold = 0;
     int key;
-    int q;
-    int y;
-    int a;
-    char string[8];
+    int choice;
+    int i;
+    int spell;
+    char num[8];
     char *weapon[] = {"Food", "Rapier", "Axe", "Shield", "Bow and Arrow", "Magic Amulet"};
     char *monster[] = {"", "Skeleton", "Thief", "Giant Rat", "Orc", "Viper", "Carrion Crawler",
                        "Gremlin", "Mimic", "Daemon", "Balrog"};
 
 again:
-    textout(screen, font, "Attack!      ", 8, 167, 9);
-    textout(screen, font, "Which Weapon?     ", 8, 175, 11);
+    textout(screen, font, "Attack!      ", 8, 167, CLR_LIGHTBLUE);
+    textout(screen, font, "Which Weapon?     ", 8, 175, CLR_LIGHTCYAN);
     key = readkey() & 0xff;
     switch (key) {
     case 'r':
-        textout(screen, font, weapon[1], 120, 175, 11);
-        if (player.owned[1] < 1)
+        textout(screen, font, weapon[IT_RAPIER], 120, 175, CLR_LIGHTCYAN);
+        if (player.owned[IT_RAPIER] < 1)
         {
-            textout(screen, font, "Not Owned!", 8, 183, 11);
+            textout(screen, font, "Not Owned!", 8, 183, CLR_LIGHTCYAN);
             goto again;
         }
         if (player.ChClass == 'M')
         {
-            textout(screen, font, "Mages can't use Rapiers!", 8, 191, 11);
+            textout(screen, font, "Mages can't use Rapiers!", 8, 191, CLR_LIGHTCYAN);
             goto again;
         }
-        dam = 10;
+        damage = 10;
         break;
     case 'a':
-        textout(screen, font, weapon[2], 120, 175, 11);
-        if (player.owned[2] < 1)
+        textout(screen, font, weapon[IT_AXE], 120, 175, CLR_LIGHTCYAN);
+        if (player.owned[IT_AXE] < 1)
         {
-            textout(screen, font, "Not Owned!", 8, 183, 11);
+            textout(screen, font, "Not Owned!", 8, 183, CLR_LIGHTCYAN);
             goto again;
         }
-        dam = 5;
+        damage = 5;
         break;
     case 's':
-        textout(screen, font, weapon[3], 120, 175, 11);
-        if (player.owned[3] < 1)
+        textout(screen, font, weapon[IT_SHIELD], 120, 175, CLR_LIGHTCYAN);
+        if (player.owned[IT_SHIELD] < 1)
         {
-            textout(screen, font, "Not Owned!", 8, 183, 11);
+            textout(screen, font, "Not Owned!", 8, 183, CLR_LIGHTCYAN);
             goto again;
         }
-        dam = 1;
+        damage = 1;
         break;
     case 'b':
-        textout(screen, font, weapon[4], 120, 175, 11);
-        if (player.owned[4] < 1)
+        textout(screen, font, weapon[IT_BOW], 120, 175, CLR_LIGHTCYAN);
+        if (player.owned[IT_BOW] < 1)
         {
-            textout(screen, font, "Not Owned!", 8, 183, 11);
+            textout(screen, font, "Not Owned!", 8, 183, CLR_LIGHTCYAN);
             goto again;
         }
         if (player.ChClass == 'M')
         {
-            textout(screen, font, "Mages can't use Bows!", 8, 191, 11);
+            textout(screen, font, "Mages can't use Bows!", 8, 191, CLR_LIGHTCYAN);
             goto again;
         }
-        dam = 4;
+        damage = 4;
         goto ranged;
     case 'm':
-        textout(screen, font, weapon[5], 120, 175, 11);
-        if (player.owned[5] < 1)
+        textout(screen, font, weapon[IT_AMULET], 120, 175, CLR_LIGHTCYAN);
+        if (player.owned[IT_AMULET] < 1)
         {
-            textout(screen, font, "Not Owned!", 8, 183, 11);
+            textout(screen, font, "Not Owned!", 8, 183, CLR_LIGHTCYAN);
             goto again;
         }
         if (player.ChClass == 'F')
-            a = rand() % 4 + 1;
+            spell = rand() % 4 + 1;
         else
         {
-            textout(screen, font, "1-Ladder-Up", 8, 183, 11);
-            textout(screen, font, "2-Ladder-Dn", 130, 183, 11);
-            textout(screen, font, "3-Kill", 8, 191, 11);
-            textout(screen, font, "4-Bad??", 130, 191, 11);
-            q = readkey() & 0xff;
-            if (q == 27) goto again;
-            while (q < 49 | q > 52)
+            textout(screen, font, "1-Ladder-Up", 8, 183, CLR_LIGHTCYAN);
+            textout(screen, font, "2-Ladder-Dn", 130, 183, CLR_LIGHTCYAN);
+            textout(screen, font, "3-Kill", 8, 191, CLR_LIGHTCYAN);
+            textout(screen, font, "4-Bad??", 130, 191, CLR_LIGHTCYAN);
+            choice = readkey() & 0xff;
+            if (choice == ASCII_ESC) goto again;
+            while (choice < '1' | choice > '4')
             {
-                q = readkey() & 0xff;
-                if (q == 27) goto again;
+                choice = readkey() & 0xff;
+                if (choice == ASCII_ESC) goto again;
             }
-            a = q - 48;
+            spell = choice - '0';
         }
         if (rand() % 100 > 75)
         {
-            textout(screen, font, "Last Charge on This Amulet!", 8, 183, 11);
-            player.owned[5]--;
+            textout(screen, font, "Last Charge on This Amulet!", 8, 183, CLR_LIGHTCYAN);
+            player.owned[IT_AMULET]--;
         }
-        switch (a) {
+        switch (spell) {
         case 1:
-            textout(screen, font, "Ladder Up                  ", 8, 183, 11);
-            textout(screen, font, "                           ", 8, 191, 11);
-            dng[player.px][player.py] = 8;
+            textout(screen, font, "Ladder Up                  ", 8, 183, CLR_LIGHTCYAN);
+            textout(screen, font, "                           ", 8, 191, CLR_LIGHTCYAN);
+            dng[player.px][player.py] = DG_LADDER_UP;
             drawdungeon(player);
             break;
         case 2:
-            textout(screen, font, "Ladder Down                ", 8, 183, 11);
-            textout(screen, font, "                           ", 8, 191, 11);
-            dng[player.px][player.py] = 7;
+            textout(screen, font, "Ladder Down                ", 8, 183, CLR_LIGHTCYAN);
+            textout(screen, font, "                           ", 8, 191, CLR_LIGHTCYAN);
+            dng[player.px][player.py] = DG_LADDER_DOWN;
             drawdungeon(player);
             break;
         case 3:
-            textout(screen, font, "Magic Attack!              ", 8, 183, 11);
-            dam = player.inout + 10;
+            textout(screen, font, "Magic Attack!              ", 8, 183, CLR_LIGHTCYAN);
+            damage = player.inout + 10;
             goto ranged;
         case 4:
-            q = rand() % 3 + 1;
-            if (q == 1)
+            choice = rand() % 3 + 1;
+            if (choice == 1)
             {
-                textout(screen, font, "You have been turned      ", 8, 183, 11);
-                textout(screen, font, "into a Toad!              ", 8, 191, 11);
-                for (y = 1; y <= 4; y++)
-                    player.character[y] = 3;
+                textout(screen, font, "You have been turned      ", 8, 183, CLR_LIGHTCYAN);
+                textout(screen, font, "into a Toad!              ", 8, 191, CLR_LIGHTCYAN);
+                for (i = 1; i <= 4; i++)
+                    player.character[i] = 3;
             }
-            if (q == 2)
+            if (choice == 2)
             {
-                textout(screen, font, "You have been turned      ", 8, 183, 11);
-                textout(screen, font, "into a Lizard Man!        ", 8, 191, 11);
-                for (y = 0; y <= 4; y++)
-                    player.character[y] = floor(player.character[y] * 2.5);
+                textout(screen, font, "You have been turned      ", 8, 183, CLR_LIGHTCYAN);
+                textout(screen, font, "into a Lizard Man!        ", 8, 191, CLR_LIGHTCYAN);
+                for (i = 0; i <= 4; i++)
+                    player.character[i] = floor(player.character[i] * 2.5);
             }
-            if (q == 3)
+            if (choice == 3)
             {
-                textout(screen, font, "Backfire!                 ", 8, 183, 12);
-                player.character[0] = player.character[0] / 2;
+                textout(screen, font, "Backfire!                 ", 8, 183, CLR_LIGHTRED);
+                player.character[ST_HP] = player.character[ST_HP] / 2;
             }
             break;
         }
         return 0;
     }
-    if (dam == 0) textout(screen, font, "Hands", 120, 175, 11);
-    if (dam == 5)
+    if (damage == 0) textout(screen, font, "Hands", 120, 175, CLR_LIGHTCYAN);
+    if (damage == 5)
     {
-        textout(screen, font, "To throw or swing? ", 8, 183, 11);
+        textout(screen, font, "To throw or swing? ", 8, 183, CLR_LIGHTCYAN);
         key = readkey() & 0xff;
         if (key != 't')
-            textout(screen, font, "Swing", 160, 183, 11);
+            textout(screen, font, "Swing", 160, 183, CLR_LIGHTCYAN);
         else
         {
-            textout(screen, font, "Throw", 160, 183, 11);
-            player.owned[2]--;
+            textout(screen, font, "Throw", 160, 183, CLR_LIGHTCYAN);
+            player.owned[IT_AXE]--;
 ranged:
-            for (y = 1; y <= 5; y++)
+            for (i = 1; i <= 5; i++)
             {
-                if (player.px + player.dx * y < 1 | player.px + player.dx * y > 9
-                    | player.py + player.dy * y > 9 | player.py * player.dy * y < 0)
+                if (player.px + player.dx * i < 1 | player.px + player.dx * i > 9
+                    | player.py + player.dy * i > 9 | player.py * player.dy * i < 0)
                     goto hit;
                 else
                 {
-                    mn = dng[player.px + player.dx * y][player.py + player.dy * y];
-                    mn = floor(mn / 10);
-                    if (mn > 0) goto hit;
+                    target = dng[player.px + player.dx * i][player.py + player.dy * i];
+                    target = floor(target / DG_MONSTER);
+                    if (target > 0) goto hit;
                 }
             }
         }
     }
-    mn = floor(dng[player.px + player.dx][player.py + player.dy] / 10);
+    target = floor(dng[player.px + player.dx][player.py + player.dy] / DG_MONSTER);
 hit:
-    if (mn < 1 | player.character[2] - rand() % 25 < mn + player.inout)
+    if (target < 1 | player.character[ST_DEXTERITY] - rand() % 25 < target + player.inout)
     {
         sound(100);
         rest(200);
         sound(0);
-        textout(screen, font, "Missed!                    ", 8, 191, 11);
+        textout(screen, font, "Missed!                    ", 8, 191, CLR_LIGHTCYAN);
     }
     else
     {
         sound(2000);
         rest(200);
         sound(0);
-        textout(screen, font, "Hit!                       ", 8, 191, 12);
-        if (dam != 0)
-            dam = rand() % dam + player.character[1] / 5;
+        textout(screen, font, "Hit!                       ", 8, 191, CLR_LIGHTRED);
+        if (damage != 0)
+            damage = rand() % damage + player.character[ST_STRENGTH] / 5;
         else
-            dam = player.character[1] / 5;
-        mz[mn][1] = mz[mn][1] - dam;
-        textout(screen, font, "Hit Points = ", 48, 191, 11);
-        itoa(mz[mn][1], string, 10);
-        textout(screen, font, string, 152, 191, 9);
-        if (mz[mn][1] < 1)
+            damage = player.character[ST_STRENGTH] / 5;
+        mz[target][1] = mz[target][1] - damage;
+        textout(screen, font, "Hit Points = ", 48, 191, CLR_LIGHTCYAN);
+        itoa(mz[target][1], num, 10);
+        textout(screen, font, num, 152, 191, CLR_LIGHTBLUE);
+        if (mz[target][1] < 1)
         {
-            dng[ml[mn][0]][ml[mn][1]] = dng[ml[mn][0]][ml[mn][1]] - mn * 10;
-            mz[mn][0] = 0;
-            player.lk = player.lk + (int)floor(mn * player.inout / 2);
-            if (mn == player.task)
+            dng[ml[target][0]][ml[target][1]] = dng[ml[target][0]][ml[target][1]] - target * DG_MONSTER;
+            mz[target][0] = 0;
+            player.lk = player.lk + (int)floor(target * player.inout / 2);
+            if (target == player.task)
             {
                 player.task = -player.task;
                 sound(1500);
@@ -1029,14 +1030,14 @@ hit:
                 sound(0);
             }
             drawdungeon(player);
-            textout(screen, font, "Thou hast killed a            ", 8, 175, 11);
-            textout(screen, font, monster[mn], 160, 175, 9);
-            gold = floor(mn + player.inout);
-            textout(screen, font, "Thou shalt receive            ", 8, 183, 11);
-            itoa(gold, string, 10);
-            textout(screen, font, string, 160, 183, 11);
-            textout(screen, font, "Pieces of Eight             ", 8, 191, 11);
-            player.character[5] = player.character[5] + gold;
+            textout(screen, font, "Thou hast killed a            ", 8, 175, CLR_LIGHTCYAN);
+            textout(screen, font, monster[target], 160, 175, CLR_LIGHTBLUE);
+            gold = floor(target + player.inout);
+            textout(screen, font, "Thou shalt receive            ", 8, 183, CLR_LIGHTCYAN);
+            itoa(gold, num, 10);
+            textout(screen, font, num, 160, 183, CLR_LIGHTCYAN);
+            textout(screen, font, "Pieces of Eight             ", 8, 191, CLR_LIGHTCYAN);
+            player.character[ST_GOLD] = player.character[ST_GOLD] + gold;
         }
     }
     rest(300);
@@ -1048,113 +1049,113 @@ hit:
 // mimic stays put. sgn(z1) is called where a statement does nothing.
 int akworld::movemonsters(charsave::savestruct &player)
 {
-    int x;
-    int xs;
-    int ys;
-    int z1;
-    int z2;
-    int it;
-    int dam;
+    int m;
+    int stepx;
+    int stepy;
+    int nexty;
+    int nextx;
+    int stolen;
+    int damage;
     int hit = 0;
-    char *string;
+    char *num;
     char *monster[] = {"", "Skeleton", "Thief", "Giant Rat", "Orc", "Viper", "Carrion Crawler",
                        "Gremlin", "Mimic", "Daemon", "Balrog"};
     char *item[] = {"Food", "Rapier", "Axe", "Shield", "Bow and Arrow", "Magic Amulet"};
 
     run1 = 0;
-    for (x = 1; x <= 10; x++)
+    for (m = 1; m <= 10; m++)
     {
-        if (mz[x][0] != 0)
+        if (mz[m][0] != 0)
         {
-            if (mz[x][1] < ((x + player.inout) * 2 + player.level) * .3)
+            if (mz[m][1] < ((m + player.inout) * 2 + player.level) * .3)
                 ;                               // too weak to fight: it flees (below)
             else
             {
-                if ((abs(player.px - ml[x][0]) == 1 & player.py == ml[x][1])
-                    | (abs(player.py - ml[x][1]) == 1 & player.px == ml[x][0]))
+                if ((abs(player.px - ml[m][0]) == 1 & player.py == ml[m][1])
+                    | (abs(player.py - ml[m][1]) == 1 & player.px == ml[m][0]))
                 {
-                    textout(screen, font, "You are being attacked     ", 8, 175, 11);
-                    textout(screen, font, "by a                       ", 8, 183, 11);
-                    textout(screen, font, monster[x], 48, 183, 9);
+                    textout(screen, font, "You are being attacked     ", 8, 175, CLR_LIGHTCYAN);
+                    textout(screen, font, "by a                       ", 8, 183, CLR_LIGHTCYAN);
+                    textout(screen, font, monster[m], 48, 183, CLR_LIGHTBLUE);
                     hit = 1;
-                    if (x != 2 & x != 7)
+                    if (m != MON_THIEF & m != MON_GREMLIN)
                     {
-attack:
-                        if (rand() % 20 - sgn(player.owned[3]) - player.character[3] + x + player.inout < 0)
+strike:
+                        if (rand() % 20 - sgn(player.owned[IT_SHIELD]) - player.character[ST_STAMINA] + m + player.inout < 0)
                         {
                             sound(100);
                             rest(200);
                             sound(0);
-                            textout(screen, font, "Missed!             ", 8, 191, 11);
+                            textout(screen, font, "Missed!             ", 8, 191, CLR_LIGHTCYAN);
                         }
                         else
                         {
                             sound(2000);
                             rest(200);
                             sound(0);
-                            textout(screen, font, "Hit!                ", 8, 191, 12);
-                            textout(screen, font, "Damage = ", 48, 191, 11);
-                            dam = rand() % x + player.inout;
-                            itoa(dam, string, 10);
-                            textout(screen, font, string, 120, 191, 9);
-                            player.character[0] = player.character[0] - dam;
+                            textout(screen, font, "Hit!                ", 8, 191, CLR_LIGHTRED);
+                            textout(screen, font, "Damage = ", 48, 191, CLR_LIGHTCYAN);
+                            damage = rand() % m + player.inout;
+                            itoa(damage, num, 10);
+                            textout(screen, font, num, 120, 191, CLR_LIGHTBLUE);
+                            player.character[ST_HP] = player.character[ST_HP] - damage;
                         }
                     }
                     else
                     {
-                        if (rand() % 100 < 90) goto attack;
-                        if (x == 7)
+                        if (rand() % 100 < 90) goto strike;
+                        if (m == MON_GREMLIN)
                         {
-                            textout(screen, font, "A Gremlin Stole Some Food!", 8, 191, 10);
-                            player.owned[0] = floor(player.owned[0] / 2);
+                            textout(screen, font, "A Gremlin Stole Some Food!", 8, 191, CLR_LIGHTGREEN);
+                            player.owned[IT_FOOD] = floor(player.owned[IT_FOOD] / 2);
                         }
-                        if (x == 2)
+                        if (m == MON_THIEF)
                         {
-                            it = rand() % 6;
-                            while (player.owned[it] < 1) it = rand() % 6;
-                            textout(screen, font, "A Thief Stole a", 8, 191, 10);
-                            textout(screen, font, item[it], 136, 191, 9);
-                            player.owned[it] = player.owned[it] - 1;
+                            stolen = rand() % 6;
+                            while (player.owned[stolen] < 1) stolen = rand() % 6;
+                            textout(screen, font, "A Thief Stole a", 8, 191, CLR_LIGHTGREEN);
+                            textout(screen, font, item[stolen], 136, 191, CLR_LIGHTBLUE);
+                            player.owned[stolen] = player.owned[stolen] - 1;
                         }
                     }
                     goto next;
                 }
             }
-            if (x == 8) goto stay;              // the mimic never moves
-            xs = sgn(player.px - ml[x][0]);
-            ys = sgn(player.py - ml[x][1]);
-            if (mz[x][1] < ((x + player.inout) * 2 + player.level) * .3)
+            if (m == MON_MIMIC) goto stay;      // the mimic never moves
+            stepx = sgn(player.px - ml[m][0]);
+            stepy = sgn(player.py - ml[m][1]);
+            if (mz[m][1] < ((m + player.inout) * 2 + player.level) * .3)
             {
-                xs = -xs;
-                ys = -ys;
+                stepx = -stepx;
+                stepy = -stepy;
                 run1 = 1;
             }
-            z1 = dng[ml[x][0]][ml[x][1] + ys];
-            z2 = dng[ml[x][0] + xs][ml[x][1]];
-            if (z1 == 1 | z1 > 9 | z1 == 2)
-                sgn(z1);
+            nexty = dng[ml[m][0]][ml[m][1] + stepy];
+            nextx = dng[ml[m][0] + stepx][ml[m][1]];
+            if (nexty == DG_WALL | nexty > 9 | nexty == DG_TRAP)
+                sgn(nexty);
             else
             {
-                dng[ml[x][0]][ml[x][1]] = dng[ml[x][0]][ml[x][1]] - x * 10;
-                xs = 0;
-                ml[x][0] = ml[x][0] + xs;
-                ml[x][1] = ml[x][1] + ys;
-                dng[ml[x][0]][ml[x][1]] = dng[ml[x][0]][ml[x][1]] + x * 10;
+                dng[ml[m][0]][ml[m][1]] = dng[ml[m][0]][ml[m][1]] - m * DG_MONSTER;
+                stepx = 0;
+                ml[m][0] = ml[m][0] + stepx;
+                ml[m][1] = ml[m][1] + stepy;
+                dng[ml[m][0]][ml[m][1]] = dng[ml[m][0]][ml[m][1]] + m * DG_MONSTER;
             }
-            if (z2 == 1 | z2 > 9 | z2 == 2)
-                sgn(z2);
+            if (nextx == DG_WALL | nextx > 9 | nextx == DG_TRAP)
+                sgn(nextx);
             else
             {
-                dng[ml[x][0]][ml[x][1]] = dng[ml[x][0]][ml[x][1]] - x * 10;
-                ys = 0;
-                ml[x][0] = ml[x][0] + xs;
-                ml[x][1] = ml[x][1] + ys;
-                dng[ml[x][0]][ml[x][1]] = dng[ml[x][0]][ml[x][1]] + x * 10;
+                dng[ml[m][0]][ml[m][1]] = dng[ml[m][0]][ml[m][1]] - m * DG_MONSTER;
+                stepy = 0;
+                ml[m][0] = ml[m][0] + stepx;
+                ml[m][1] = ml[m][1] + stepy;
+                dng[ml[m][0]][ml[m][1]] = dng[ml[m][0]][ml[m][1]] + m * DG_MONSTER;
             }
         }
 next:
 stay:
-        sgn(z1);
+        sgn(nexty);
     }
     if (run1 == 1) drawdungeon(player);
     return 0;
@@ -1180,17 +1181,17 @@ int akworld::viewintro(charsave::savestruct &player)
     sav.inout = -1;
     sav.tx = 2;
     sav.ty = 2;
-    world[1][1] = 2;
-    world[1][2] = 0;
-    world[1][3] = 3;
-    world[3][1] = 5;
-    world[3][2] = 0;
-    world[3][3] = 4;
-    world[2][1] = 0;
-    world[2][2] = 1;
-    world[2][3] = 0;
-    textout_centre(screen, font, "Ultima 0 - Akalabeth", 160, 167, 11);
-    textout_centre(screen, font, "Intro - Hit a Key", 160, 175, 11);
+    world[1][1] = LAND_TREE;
+    world[1][2] = LAND_PLAINS;
+    world[1][3] = LAND_TOWN;
+    world[3][1] = LAND_CASTLE;
+    world[3][2] = LAND_PLAINS;
+    world[3][3] = LAND_DUNGEON;
+    world[2][1] = LAND_PLAINS;
+    world[2][2] = LAND_MOUNTAINS;
+    world[2][3] = LAND_PLAINS;
+    textout_centre(screen, font, "Ultima 0 - Akalabeth", 160, 167, CLR_LIGHTCYAN);
+    textout_centre(screen, font, "Intro - Hit a Key", 160, 175, CLR_LIGHTCYAN);
     while (!keypressed())
     {
         clear(worldbmp);
@@ -1212,13 +1213,13 @@ int akworld::viewintro(charsave::savestruct &player)
             rest(300);
             break;
         }
-        line(worldbmp, x * 58 + 138, (y - 1) * 52 + 78, x * 58 + 143, (y - 1) * 52 + 78, 11);
-        line(worldbmp, x * 58 + 141, (y - 1) * 52 + 76, x * 58 + 141, (y - 1) * 52 + 80, 11);
-        if (i == 4) textout(screen, font, "Quest Please!              ", 8, 183, 11);
-        if (i == 11 | i == 24) textout(screen, font, "Three Axes to go! ", 8, 183, 11);
-        if (i == 16) textout(screen, font, "PoW! ", 8, 183, 11);
-        if (i == 18) textout(screen, font, "Thunk! ", 40, 183, 11);
-        if (i == 20) textout(screen, font, "ZiFF!", 88, 183, 11);
+        line(worldbmp, x * 58 + 138, (y - 1) * 52 + 78, x * 58 + 143, (y - 1) * 52 + 78, CLR_LIGHTCYAN);
+        line(worldbmp, x * 58 + 141, (y - 1) * 52 + 76, x * 58 + 141, (y - 1) * 52 + 80, CLR_LIGHTCYAN);
+        if (i == 4) textout(screen, font, "Quest Please!              ", 8, 183, CLR_LIGHTCYAN);
+        if (i == 11 | i == 24) textout(screen, font, "Three Axes to go! ", 8, 183, CLR_LIGHTCYAN);
+        if (i == 16) textout(screen, font, "PoW! ", 8, 183, CLR_LIGHTCYAN);
+        if (i == 18) textout(screen, font, "Thunk! ", 40, 183, CLR_LIGHTCYAN);
+        if (i == 20) textout(screen, font, "ZiFF!", 88, 183, CLR_LIGHTCYAN);
         i++;
         if (i == 26) i = 0;
         rest(300);
