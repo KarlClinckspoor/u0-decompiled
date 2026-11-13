@@ -80,3 +80,19 @@ Source names must be given in lower case (`foo.cc` is C++; `FOO.CC` is taken for
   (`and eax,1; test eax,eax; je`), and calls `__builtin_delete(this)` when it is set.
 - String literals of a function follow the function in `.text` (`LCn` labels). Doubles a function
   uses come before it.
+- A `switch` with a jump table is `cmp [ebp-N],max; ja default; mov r,[ebp-N];
+  mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`. The table (absolute addresses of the cases)
+  sits in `.text` right after the `jmp`, aligned to 4.
+
+## The link (proven in phase 3)
+
+gcc 2.7.2.1 links with
+
+```
+ld -o ak crt0.o ak.o akaux.o akchar.o akmenu.o akworld.o -lalleg -liostr -Tdjgpp.djl -lgcc -lc -lgcc
+```
+
+and then runs `stubify` (which the COFF comparison leaves out). That command, with liballeg.a
+built by `tools/buildalleg.py` and the stand-ins, reproduces AK.COF's headers, `.text` and `.data`
+exactly (`tools/build.py`). The game objects must therefore keep their exact sizes. Each ends on
+a 4-byte boundary, and ld places objects back to back.

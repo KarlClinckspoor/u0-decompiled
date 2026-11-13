@@ -9,7 +9,7 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 
 | file | what | status |
 |---|---|---|
-| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | unpacked and mapped (phase 1); **toolchain proven** (phase 2): Allegro objects rebuild identical, first game functions match. No source tree yet |
+| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **links with identical code and data** (phase 3): every library object rebuilt or shipped identical, the five game objects as generated assembly stand-ins (`src/standin/`). The game in C++ is next |
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
 | SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
 
@@ -25,6 +25,15 @@ python tools/coff.py files build/AK.COF           # objects in link order
 python tools/coff.py funcs build/AK.COF akworld.cc
 python tools/coff.py types build/AK.COF ak.cc     # classes from ak.cc's -g information
 python tools/akdat.py list                        # AK.DAT's objects
+```
+
+With the toolchain archives in `tools/` (docs/HANDOFF.md lists them):
+
+```sh
+python tools/setup.py            # unpack the toolchain into build/tc
+python tools/buildalleg.py       # build Allegro 2.2's liballeg.a
+python tools/libmatch.py --quiet # all library objects identical
+python tools/build.py            # link, compare with the original COFF
 ```
 
 None of them needs anything beyond Python 3. capstone (`../u1-decompiled/build/venv`) is useful

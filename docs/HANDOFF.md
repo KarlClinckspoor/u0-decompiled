@@ -1,6 +1,8 @@
 # Handoff: Akalabeth decompilation (u0-decompiled)
 
-State as of 2026-11-13: phases 0, 1 and 2 of docs/PLAN.md are done. Read this first, then
+State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
+`.text` and `.data` identical to the original**, from the real libraries and assembly
+stand-ins for the five game objects. Phase 4 (the game in C++) is next. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -45,6 +47,29 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
   13-20 November 1997.
 - SETUP.EXE's COFF is stripped (no symbols). It is Allegro 2.2's stock setup program.
 
+## Phase 3 (done 2026-11-13): every library object identical, sections link identical
+
+- `python tools/buildalleg.py` builds Allegro 2.2's liballeg.a with its own makefile (binutils
+  2.7 first on `COMPILER_PATH`; make 3.75 misses `asmdef.c` through VPATH, so the script builds
+  and runs asmdef first). It takes about 45 s.
+- `python tools/libmatch.py` pairs every object of AK.COF with a library member **by symbol**
+  and compares `.text`/`.data` (relocated fields masked) and `.bss` size. Result: **all 257
+  library objects identical**: crt0, 187 libc.a (stubs included), 7 libgcc.a, 22 libiostr.a,
+  40 liballeg.a. 6 objects are empty and 5 are the game.
+- `python tools/standin.py` writes `src/standin/ak*.s`. Each is a gas source with the game
+  object's original bytes, where every address is a relocation: `.long _screen`, `.long LC12`,
+  `call _textout`, and switch tables as `.long L…`. Code is found by following control flow.
+  At `-O0`, gcc 2.7.2.1 compiles a switch as `mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`,
+  bounded by the `cmp` before it. Every code label is reached. No constant was mistaken for an
+  address: every target in the object's own code is a real label, and the only external data
+  the game touches are `screen`, `font`, `cout`, `cin` and `__dj_stderr`.
+- `python tools/build.py` assembles the stand-ins (or compiles `src/NAME.cc` once it exists) and
+  links as gcc does: `ld -o ak crt0.o OBJS -lalleg -liostr -Tdjgpp.djl -lgcc -lc -lgcc`. It then
+  compares with AK.COF. **File header, a.out header, section headers, `.text` (331608 bytes)
+  and `.data` (27136 bytes) are identical**, in about 6 s. The symbol table differs (7678
+  symbols against 9382, no line numbers, so ld also sets the F_LNNO flag, 0x107 against 0x103).
+  That is ak.cc's `-g` information and the game's local symbols, which the C++ will bring back.
+
 ## Repository
 
 | file | what |
@@ -55,6 +80,11 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | `tools/setup.py` | unpacks the sha1-checked archives into `build/tc` (DJGPP tree, binutils 2.7 in `BNU27`, Allegro, libc sources) |
 | `tools/dos.py` | headless DOSBox runner for DJGPP (C: work, D: DJGPP, E: Allegro), output via `redir`, long lines via `@response` files |
 | `tools/gxx.py` | compile one .cc/.c and compare each function with AK.COF by mangled name (docs/MATCHING.md) |
+| `tools/buildalleg.py` | builds liballeg.a in `build/alleg` as AK.EXE's was built |
+| `tools/libmatch.py` | pairs every library object of AK.COF with an archive member by symbol and compares |
+| `tools/standin.py` | generates `src/standin/*.s`, the assembly stand-ins of the game objects |
+| `tools/build.py` | builds the COFF (C++ where it exists, stand-ins elsewhere), links, compares with AK.COF |
+| `src/standin/*.s` | generated stand-ins for ak.cc, akaux.cc, akchar.cc, akmenu.cc, akworld.cc; each is deleted when its C++ matches |
 | `tools/exediff.py`, `fat12.py` | copied from u1; not used yet |
 | `docs/PLAN.md`, `docs/MAP.md` | the plan; the map of AK.EXE |
 
@@ -137,14 +167,25 @@ docs/MATCHING.md has the details. In short:
 
 ## Next steps
 
-1. **Phase 3, libraries and a stand-in link.**
-   - Build all of liballeg.a with its makefile (binutils 2.7) and match every Allegro object,
-     including the `.s` files (the `fake` objects).
-   - Write `tools/libmatch.py`: pair every library object of AK.COF with an archive member by
-     its symbols (not by file name: the `*.stub` and math objects need that), and report.
-   - Then link a COFF from crt0, the libraries and stand-ins for the five game objects, in
-     docs/MAP.md's order, and compare it with AK.COF.
-2. **Phase 4** can start alongside: akmenu.cc (2 KB, 5 functions) is the smallest object;
-   `tools/gxx.py` is the loop.
+To rebuild everything from the archives:
+
+```sh
+python tools/setup.py            # build/tc from tools/*.zip (sha1-checked)
+python tools/buildalleg.py       # build/alleg/LIB/DJGPP/LIBALLEG.A
+python tools/libmatch.py --quiet # all library objects identical
+python tools/build.py            # SECTIONS IDENTICAL to the original COFF
+```
+
+1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc (2 KB,
+   5 functions), akaux.cc (5 KB), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
+   fix the source's line layout), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB).
+   - Loop per function: `tools/gxx.py src/akmenu.cc`.
+   - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the
+     stand-in, and the sections must stay identical. Delete the stand-in then.
+   - The class layouts are in docs/MAP.md; MATCHING.md has the -O0 code patterns.
+   - akworld.cc can go to parallel agents by function once the first objects have set the
+     conventions (lesson 11 of docs/PLAN.md).
+2. Then the symbol table: with all five objects in C++ (ak.cc with `-g`), compare the whole
+   COFF, symbols and line numbers included.
 4. Optional, any time: a disassembly of `rungame` beside its line table to see how the source's
    statements map to code (`coff.py` has the lines; a small `tools/lines.py` would print them).

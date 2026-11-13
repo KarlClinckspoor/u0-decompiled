@@ -5,7 +5,9 @@ Written 2026-11-13. **Status: phases 0 and 1 done (2026-11-13). AK.EXE is unpack
 `-g` information for ak.cc (docs/MAP.md). The game is 5 objects, 36 functions and 100 KB of
 `.text`. Phase 2 done the same day: gcc 2.7.2.1 runs headless in DOSBox, Allegro objects rebuild
 identical, and the game turns out to be `-O0` assembled with binutils 2.8.1 (docs/MATCHING.md).
-Next is phase 3. docs/HANDOFF.md has the results.** This plan is based on the sister projects
+Phase 3 done too: all 257 library objects are identical, and with assembly stand-ins for the
+game the link reproduces the original's headers, `.text` and `.data`. Next is phase 4, the game
+in C++. docs/HANDOFF.md has the results.** This plan is based on the sister projects
 `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` (their README, docs/HANDOFF.md,
 FINDINGS.md, MATCHING.md and U3's PLAN.md), on `../u6md-decompiled/U6-LESSONS_DECOMPILATION.md`,
 and on a first look at the GOG files in `gamedata/`. The goal is the same as theirs: source that

@@ -56,6 +56,7 @@ c:
 """
 
 LOG = '_LOG.TXT'
+BUILTINS = {'SET', 'CD', 'MD', 'MKDIR', 'DEL', 'COPY', 'C:', 'D:', 'E:'}
 
 
 def run(workdir, cmds, log=True, timeout=600):
@@ -70,6 +71,11 @@ def run(workdir, cmds, log=True, timeout=600):
     for k, c in enumerate(cmds):
         # DOS cuts command lines at 127 characters; DJGPP programs read @response files, so the
         # arguments of a long command go into one (C:\_RSPn.TXT, removed afterwards)
+        word = c.split(' ', 1)[0].upper()
+        if word in BUILTINS:
+            # shell built-ins (SET, CD, ...) must run in the session itself, not under redir
+            lines.append(c)
+            continue
         if len(c) > 100 and ' ' in c:
             prog, args = c.split(' ', 1)
             name = '_RSP%d.TXT' % k
@@ -83,8 +89,8 @@ def run(workdir, cmds, log=True, timeout=600):
         if log:
             # DOSBox's shell has no ^ escape: keep redirection characters out of the echo
             shown = shown.replace('>', '}').replace('<', '{').replace('|', '!')[:110]
-            lines.append('ECHO ## %s >> %s' % (shown, LOG))
-            lines.append('REDIR -oa %s -eo %s' % (LOG, c))
+            lines.append('ECHO ## %s >> C:\\%s' % (shown, LOG))
+            lines.append('REDIR -oa C:\\%s -eo %s' % (LOG, c))
         else:
             lines.append(c)
     # the commands go in a batch file: DOSBox 0.74's [autoexec] overflows at about 4 KB
