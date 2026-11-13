@@ -9,7 +9,7 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 
 | file | what | status |
 |---|---|---|
-| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **the program inside rebuilds identical** (phase 4): the five game files in C++ (`src/`) with the rebuilt Allegro and the shipped DJGPP libraries give AK.COF byte for byte, symbol table and debug information included. The WDOSX wrapper around it (phase 7) is next |
+| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **rebuilds identical, sha1 756637c8...** (phases 4 and 7): the five game files in C++ (`src/`), the rebuilt Allegro and the shipped DJGPP libraries give the program, AK.COF, byte for byte (symbol table and debug information included). `tools/postlink.py` then wraps it with WDOSX's packer, ported to Python, taking the WDOSX kernel and stub from the GOG file at build time |
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
 | SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
 
@@ -33,7 +33,7 @@ With the toolchain archives in `tools/` (docs/HANDOFF.md lists them):
 python tools/setup.py            # unpack the toolchain into build/tc
 python tools/buildalleg.py       # build Allegro 2.2's liballeg.a
 python tools/libmatch.py --quiet # all library objects identical
-python tools/build.py            # link, compare with the original COFF
+python tools/build.py            # link, wrap, compare with AK.COF and AK.EXE
 ```
 
 None of them needs anything beyond Python 3. capstone (`../u1-decompiled/build/venv`) is useful

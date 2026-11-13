@@ -1,10 +1,11 @@
 # Handoff: Akalabeth decompilation (u0-decompiled)
 
-State as of 2026-11-13: phases 0 to 4 of docs/PLAN.md are done. **AK.COF, the program
-inside AK.EXE, rebuilds identical byte for byte** from the five game files in C++ (`src/`), the
-rebuilt Allegro and the shipped DJGPP libraries: headers, code, data, all 9382 symbols and
-all 316 line numbers. No stand-ins are left. Next: phase 7 (re-wrapping it into AK.EXE) and the
-readable and mechanics passes (phases 5 and 6). Read this first, then
+State as of 2026-11-13: phases 0 to 4 and 7 of docs/PLAN.md are done. **AK.EXE rebuilds
+identical byte for byte** (sha1 756637c8...). The five game files in C++ (`src/`), the
+rebuilt Allegro and the shipped DJGPP libraries give AK.COF, identical down to the symbol
+table and line numbers. The post-link step then wraps it the way WDOSX 0.97's stubit does,
+with the WDOSX kernel and stub copied from gamedata at build time. Next: the readable and
+mechanics passes (phases 5 and 6). Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -92,6 +93,26 @@ spill slots and the x87 stack become expressions, member accesses get names and 
 one line per store, call or branch (`PSEUDO_TEMPS=94,90` forces frame slots to be temporaries).
 `tools/gxx.py src/NAME.cc` compares functions, and also symbols when the file is a whole object.
 For a `-g` object it also compares every debug symbol and the line numbers (`DEBUG`, `LINES`).
+
+## Phase 7 (done 2026-11-13): the shipped file
+
+WDOSX 0.97 Final's sources (2005) are archived at github.com/amindlost/wdosx (cloned to
+`build/dl/wdosx`, ignored; downloaded with Karl's OK). They have no `stubit.exe` binary, but
+they do have its source:
+- `src/util/stubit.c` writes the kernel and the COFF loader stub, then calls
+  `src/util/addfile.asm`, which writes the WFSE entry: 4096-byte chunks, each packed by
+- `src/wpack/wpack.c`, WDOSX-Pack 1.07 (Joergen Ibsen; the algorithm is dated 2001, before
+  AK.EXE's 2002 wrapper).
+
+`tools/wpack.py` is a line-by-line port of `wpack.c`. It packs all 140 chunks of AK.COF
+exactly as AK.EXE has them, in about 4 seconds. `tools/postlink.py` builds the WFSE entry as
+addfile.asm does and puts it after the kernel and stub, which it copies from
+gamedata/AK.EXE (they are WDOSX's bytes and are never committed). `tools/build.py` runs it
+after the link and reports `AK.EXE IDENTICAL to the shipped file`.
+
+Not done:
+- building the WDOSX kernel and stub from WDOSX's assembly sources (it would need TASM);
+- SETUP.EXE, which needs Allegro's setup.c compiled and linked first.
 
 ## Repository
 
@@ -200,15 +221,11 @@ To rebuild everything from the archives:
 python tools/setup.py            # build/tc from tools/*.zip (sha1-checked)
 python tools/buildalleg.py       # build/alleg/LIB/DJGPP/LIBALLEG.A
 python tools/libmatch.py --quiet # all library objects identical
-python tools/build.py            # SECTIONS IDENTICAL to the original COFF
+python tools/build.py            # AK.COF and AK.EXE identical to the originals
 ```
 
-1. **Phase 7, the shipped file**: wrap our AK.COF into AK.EXE. Try WDOSX 0.97's `stubit` in
-   DOSBox first (needs a download, ask Karl); otherwise a `tools/postlink.py` that re-packs with
-   the Python port of the LZ format in `tools/wdosx.py`, taking the kernel and stub bytes from
-   gamedata at build time. Gate: AK.EXE's sha1.
-2. **Phase 5, readable pass**: the names of akworld.cc's locals and parameters are guesses (it
+1. **Phase 5, readable pass**: the names of akworld.cc's locals and parameters are guesses (it
    has no `-g`); magic numbers (map values, colours, key codes) could become named constants
    where the rebuild allows. Every change is checked by `tools/build.py`.
-3. **Phase 6, mechanics**: docs/game/ from docs/FINDINGS.md, and check the findings in play
+2. **Phase 6, mechanics**: docs/game/ from docs/FINDINGS.md, and check the findings in play
    (DOSBox with the GOG game).

@@ -13,14 +13,16 @@ Layout of a WDOSX file, as found in AK.EXE:
               +00 'WFSE'
               +04 dword  entry size in the file, header included
               +08 dword  unpacked size
-              +0C dword  0x26 in AK.EXE (meaning unknown)
-              +10 16 bytes  file name, zero-terminated (the bytes after the zero are junk)
+              +0C dword  flags: stub class (6 = DJGPP COFF) | 0x20 (WDOSX-Pack compressed)
+              +10 16 bytes  file name "WdosxMain", zero-terminated, then word 6 and the
+                         packed size of the last chunk (WDOSX 0.97 util/addfile.asm)
               +20 dword[n]  offsets of the n packed 4096-byte chunks, from the end of the table
               then the chunks, each an independent LZ stream (`unpack`); a chunk whose packed
               span equals its unpacked size is stored as it is.
             The program the stub runs is the entry named 'WdosxMain' (a DJGPP COFF image).
 
-The LZ format (the kernel's own decoder at 0083, 16-bit code):
+The LZ format is WDOSX-Pack 1.07 by Joergen Ibsen (tools/wpack.py packs it; tools/postlink.py
+builds a whole WFSE entry). As the kernel's own decoder at 0083 (16-bit code) reads it:
   bits are read MSB first from a tag byte refilled from the stream; the first byte is a literal.
   0      literal byte
   1 L O  match: L and O are gamma codes (start at 1; repeat: value = 2*value + bit, continue

@@ -14,8 +14,13 @@ Output in build/link/. The comparison covers the file header, the a.out header, 
 headers (pointers to line numbers and symbols aside) and the bytes of .text and .data. The
 symbol table is reported separately: stand-ins cannot reproduce it.
 
-Exit status 0 when the sections are identical.
+Then the post-link step (phase 7, tools/postlink.py) wraps the COFF into build/link/AK.EXE the
+way WDOSX 0.97's stubit does, taking the WDOSX kernel and stub from gamedata/AK.EXE, and compares
+it with the shipped file.
+
+Exit status 0 when the sections are identical (and AK.EXE too, when gamedata/AK.EXE is there).
 """
+import hashlib
 import argparse
 import os
 import shutil
@@ -25,8 +30,9 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-import coff  # noqa: E402
-import dos   # noqa: E402
+import coff      # noqa: E402
+import dos       # noqa: E402
+import postlink  # noqa: E402
 
 OBJS = ['ak', 'akaux', 'akchar', 'akmenu', 'akworld']
 CFLAGS = {'ak': '-O0 -g'}   # the others: -O0
@@ -108,6 +114,16 @@ def main():
     path = build()
     ok = compare(path, a.verbose)
     print('SECTIONS IDENTICAL to the original COFF' if ok else 'NOT identical')
+    shipped = os.path.join(ROOT, 'gamedata', 'AK.EXE')
+    if os.path.exists(shipped):
+        orig = open(shipped, 'rb').read()
+        exe = postlink.prefix_of(orig) + postlink.wfse(open(path, 'rb').read())
+        out = os.path.join(os.path.dirname(path), 'AK.EXE')
+        open(out, 'wb').write(exe)
+        same = exe == orig
+        print('AK.EXE %s (%d bytes, sha1 %s)' % ('IDENTICAL to the shipped file' if same else 'DIFFERS',
+                                                  len(exe), hashlib.sha1(exe).hexdigest()))
+        ok = ok and same
     return 0 if ok else 1
 
 

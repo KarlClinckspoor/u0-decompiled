@@ -10,7 +10,7 @@ virtual addresses of the COFF program (`build/AK.COF`). Regenerate the tables wi
 |---|---|---|
 | WDOSX 0.97 kernel | 0000-25F8 | MZ program. Its 16-bit image is LZ-packed and unpacks itself in place (`wdosx.py` uses the same decoder) |
 | stub | 25F8-2A21 | WDOSX's `go32stub, v 2.00T` (inner MZ, 1065 bytes) |
-| WFSE `WdosxMain` | 2A21-3A572 | the DJGPP COFF program, in 140 independently packed 4096-byte chunks |
+| WFSE `WdosxMain` | 2A21-3A572 | the DJGPP COFF program, in 140 independently packed 4096-byte chunks (WDOSX-Pack 1.07; flags 0x26 = COFF class 6 + packed 0x20). `tools/postlink.py` rebuilds it identical |
 
 AK.EXE and SETUP.EXE carry byte-identical kernels and stubs. The program unpacks to
 `build/AK.COF`: 570462 bytes, sha1 `3badf300cef0032f57b12468b51b448c3926bcab`. SETUP's is
