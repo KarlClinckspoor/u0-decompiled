@@ -183,9 +183,10 @@ sessions (Exhume's `runtime/port` + `replay`, in `../underworld-exhumed-enhanced
 
 ## 4. Tools to acquire
 
-None of these are in the folder. All were freely distributed. Karl provides the archives, or
-says yes to downloading them (a download needs his OK). Exact file names are to be checked
-against the archive.
+**Done 2026-11-13** (Karl said to download them). The archives are in `tools/`, and
+docs/HANDOFF.md lists the exact files, sources and sha1s. In short: djdev201, djlsr201, bnu27b,
+mak375b, csdpmi3b/4b, gcc2721b, gpp2721b, lgp271b, alleg22. The libraries match AK.EXE byte for
+byte. WDOSX 0.97 is not downloaded yet; it is only needed in phase 7. The original table:
 
 | what | where it was distributed | why |
 |---|---|---|

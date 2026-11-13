@@ -74,6 +74,38 @@ Git: `master`, local only, author set in the repository's config as in u1. `tool
 | README.NOW | 2488 | 015d114b405b6b57c4b28dcd212fada18825cfce |
 | WHATS.NEW | 2320 | 355a8616d1b7eb25e907c8d17aacd87eab4aa9d9 |
 
+### Toolchain archives (downloaded 2026-11-13, in `tools/`, ignored by git)
+
+| archive | bytes | sha1 | from | what |
+|---|---|---|---|---|
+| djdev201.zip | 1538295 | ef2129363cdc031c1163543b9dbdf4e763750173 | delorie.com/pub/djgpp/deleted/v2/ | DJGPP 2.01: crt0.o, libc.a, libm.a, headers, stubify |
+| djlsr201.zip | 1472671 | 9dd9de039f632093f03ba6ca53059dd3388209b5 | delorie.com/pub/djgpp/deleted/v2/ | DJGPP 2.01 libc sources (reference) |
+| bnu27b.zip | 1712024 | 89696fbc9766b32ab5d554a1df591f7093dbbcb0 | delorie.com/pub/djgpp/deleted/v2gnu/ | binutils 2.7 (as, ld, ar, objdump) |
+| mak375b.zip | 209185 | 2ba09b8fdbb0af7fe955c4966c6083ad8ff512a0 | delorie.com/pub/djgpp/deleted/v2gnu/ | GNU make 3.75 |
+| csdpmi3b.zip | 40719 | 9e8a4487ef1e2e154552e9f4afd4306f8958910d | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r3 (1996) |
+| csdpmi4b.zip | 41506 | 4f56ee401bafa6e8881e96dbd85794a1b08dc690 | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r4 (Oct 1997) |
+| gcc2721b.zip | 1096967 | a52d1dfce480ad64b30cc24a6febc475d3cad792 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | gcc 2.7.2.1 (cc1, libgcc.a) |
+| gpp2721b.zip | 681045 | 6e2b72e9b60fb54aa79177b97c39f490e1cc474f | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | cc1plus 2.7.2.1 |
+| lgp271b.zip | 638706 | c13396c901ca3c2ebd8f01a6f751723146fc0296 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | libg++ 2.7.1 (libgpp.a, libiostr.a, libstdcx.a) |
+| alleg22.zip | 1007783 | 56f8c1362a3f2920b584201cc159faa0f80e0162 | liballeg.org/files/ | Allegro 2.2 source (1997-03-01) |
+
+gcc 2.7.2.1 is no longer in the DJGPP archive. Its `deleted/v2gnu/gcc2721.txt` points to Martin
+Strömberg's site, which still has it.
+
+What was checked:
+- Every zip passes its integrity test.
+- libc.a's ident is exactly AK.EXE's: `$Id: DJGPP libc built Oct 31 1996 19:13:19 by gcc 2.7.2.1 $`.
+- cc1plus says 2.7.2.1. allegro.h says 2.2.
+- A quick name-based pairing of archive members with AK.COF's objects (`.text` compared, with
+  relocated words masked) found them **byte-identical**: 159 libc.a objects, all 5 libgcc.a
+  objects, 21 libiostr.a objects (so the game was linked with `-liostr`, as Allegro's setup is)
+  and crt0.o.
+- Not yet paired: the libc `*.stub` objects and the `fake` (assembly) math objects, which need
+  pairing by symbol rather than by file name.
+- Allegro 2.2's makefile builds with `-m486 -O3 -ffast-math -fomit-frame-pointer`. AK.EXE's
+  Allegro functions are 4-byte aligned, which may mean Corey Roth dropped `-m486`, or that gcc
+  2.7.2.1 for DJGPP aligns to 4 even with it. Phase 3 will tell.
+
 ## Conventions
 
 - On Windows, run the tools with plain `python` (no capstone needed) or with
@@ -85,10 +117,11 @@ Git: `master`, local only, author set in the repository's config as in u1. `tool
 
 ## Next steps
 
-1. **Phase 2, the toolchain** (needs Karl): the archives listed in docs/PLAN.md section 4.
-   DJGPP 2.01 (djdev201), gcc 2.7.2.1 + gpp, binutils 2.7, libgpp 2.7.x, make, CWSDPMI and
-   Allegro 2.2 source. Then adapt `tools/setup.py` and `tools/dos.py` to run gcc in headless
-   DOSBox with CWSDPMI and `DJGPP=...\djgpp.env`, and smoke-test hello.cc.
+1. **Phase 2, the toolchain.** The archives are in `tools/` (table above). Adapt
+   `tools/setup.py` to unpack them into `build/tc` (all are plain zips; Python's zipfile is
+   enough), and `tools/dos.py` to run gcc in headless DOSBox with CWSDPMI and
+   `DJGPP=...\djgpp.env`. Then smoke-test hello.cc and compile one libc source from djlsr201
+   to see that it gives the archive's object.
 2. **Phase 3**: `tools/libmatch.py` for COFF (compare each library symbol's bytes in AK.COF with
    the archive members, by name, masking addresses). DJGPP's libc.a and libgpp should match as
    shipped. Build Allegro 2.2 and match it: that proves gcc's version and flags.
