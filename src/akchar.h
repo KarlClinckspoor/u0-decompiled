@@ -20,10 +20,10 @@ public:
         int dx, dy;                 // facing in the dungeon
         int inout;                  // 0 on the surface, else the dungeon level
         int task;                   // Lord British's quest: the monster to kill (negative: done)
-        int visit;                  // 1 once Lord British has been met
-        int lk;
+        int visit;                  // 1 once Lord British gave a quest (View Ending sets 2)
+        int lk;                     // hit points earned by kills, paid out on leaving the dungeon
     } sav;
-    int count;                      // turns, for food in the dungeon
+    int count;                      // turns, for food in the dungeon (not saved)
 
     charsave();
     ~charsave();

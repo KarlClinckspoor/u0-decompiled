@@ -11,10 +11,12 @@
 #include "akworld.h"
 #include "akdefs.h"
 
-// The perspective tables for the 3-D dungeon view. xx/yy are the half-width and half-height
-// of the corridor at each distance (the Apple's 280x160 view scaled to 320x166); per, cd, ld,
-// ft and lad are the corners of walls, doors, ladders and so on at each distance.
-akworld::akworld()
+// The perspective tables of the 3-D dungeon view, for each distance dist (0 = the player's
+// square). xx/yy are the corridor's half-width and half-height (the Apple's 280x160 view, from
+// atan(1 / (2 * dist)), scaled to 320x166); per holds the corners of the corridor (left, right,
+// top, bottom), cd those of a door ahead, ld those of a door in a side wall, ft the hole in
+// the floor (mirrored: in the ceiling) under a ladder, lad the ladder's rails. side is the width of the side wall at dist; y is unused.
+akworld::akworld()                                      // 007A48
 {
     int side;
     int dist;
@@ -76,13 +78,17 @@ akworld::akworld()
     }
 }
 
-akworld::~akworld()
+akworld::~akworld()                                     // 008708
 {
 }
 
-// The world map: a wall of mountains, then random terrain, 0 plains to 4 (rarely) a dungeon;
-// one castle. mode 0 is a new game: the player starts on a town at a random place.
-int akworld::createworld(int mode, charsave::savestruct &player)
+// The world map, from the lucky number (srandom(ln)): a border of mountains, then each square
+// floor(RND^5 * 4.5): 75% plains, 11% mountains, 7% trees, 5% towns, 2% dungeons; then one
+// castle. A new game (mode 0) puts the player on a town at a random square; a loaded game
+// (mode 1) puts a town at a random square too, and since the random numbers come in the same
+// order, it is the same square: a loaded game gets exactly the world of the new game. The
+// second test was probably meant to thin out the towns: it sets a town to a town (FINDINGS).
+int akworld::createworld(int mode, charsave::savestruct &player)// 00876C
 {
     int x;
     int y;
@@ -116,9 +122,9 @@ int akworld::createworld(int mode, charsave::savestruct &player)
     return 0;
 }
 
-// The 3x3 squares around the player, 58x52 pixels each: 1 mountains, 2 a tree, 3 a town,
-// 4 a dungeon entrance, 5 the castle. On the surface a cross marks the player.
-int akworld::drawworld(charsave::savestruct &player)
+// The 3x3 squares around the player, 58x52 pixels each (left, top: the square's corner).
+// A cross in the middle marks the player.
+int akworld::drawworld(charsave::savestruct &player)    // 008C34
 {
     int x;
     int y;
@@ -181,10 +187,13 @@ int akworld::drawworld(charsave::savestruct &player)
     return 0;
 }
 
-// A dungeon level: the same level of the same game is always the same (the seed is the lucky
-// number and the level). 1 wall, 2 trap, 3 hidden door, 4 door, 5 chest of gold, 7/9 ladder
-// down, 8 ladder up.
-int akworld::createdungeon(charsave::savestruct &player)
+// A dungeon level, from srandom(ln * 3 + level): the same level of the same game is always the
+// same. A border, and walls on every even row and column; each wall square between two rooms
+// then rolls in turn for a trap (4%), a hidden door (29%), a door (59%), a hole (2%) and a chest
+// (5%), a later roll overwriting an earlier one. The ladders sit at (7,3) and (3,7), down and up
+// swapping with the level's parity, so a ladder always arrives on the matching ladder; on level
+// 1 the exit is the up ladder at (1,1) and (7,3) is empty.
+int akworld::createdungeon(charsave::savestruct &player)// 009244
 {
     int x;
     int y;
@@ -239,11 +248,13 @@ int akworld::createdungeon(charsave::savestruct &player)
     return 0;
 }
 
-// The 3-D view of the dungeon, drawn from the player's square outwards, one distance l at a
-// time, until a wall or a door ends it (en is never set: the returns end the loop). cent, left
-// and right are the squares ahead and beside at distance l; l1/r1/t1/b1 the near corners of
-// the corridor there and l2/r2/t2/b2 the far ones. With mdraw set the monsters are drawn too.
-int akworld::drawdungeon(charsave::savestruct &player)
+// The 3-D view of the dungeon, drawn from the player's square outwards one distance at a time
+// until a wall or a door ends it (stop is never set: the returns end the loop). ahead, left and
+// right are the squares ahead and beside at distance dist; l1/r1/t1/b1 are the near corners of
+// the corridor there and l2/r2/t2/b2 the far ones. A hidden door looks like a wall. With mdraw
+// set the monsters are drawn too, and named when they are more than one square away (the mimic
+// as "Chest!").
+int akworld::drawdungeon(charsave::savestruct &player)  // 00991C
 {
     int lbottom, ltop, lleft, lright;
     int rung1, rung2, rung3, rung4;
@@ -419,9 +430,12 @@ done:                                           // never jumped to
     return 0;
 }
 
-// The monsters of a level: monster x (1 skeleton ... 10 balrog) lives on levels down to x - 2,
-// at a free square; its hit points (mz[x][1]) grow with the level of play and the depth.
-int akworld::createmonsters(charsave::savestruct &player)
+// The monsters of a level: monster m (1 skeleton ... 10 balrog) lives on levels deeper than
+// m - 2, on a free floor square that is not the player's. mz[m][0] is 1 while it lives, mz[m][1]
+// its hit points, m * 2 + level * 2 + the level of play; ml[m] its square. random() goes on from
+// createdungeon's seed, so the monsters start on the same squares every time (for the same
+// square of the player). count is not used.
+int akworld::createmonsters(charsave::savestruct &player)// 00CF20
 {
     int count = 0;
     int m;
@@ -453,7 +467,7 @@ int akworld::createmonsters(charsave::savestruct &player)
 // offsets lack the "/ dist" (x + 17, x - 17, y - 7): those strokes do not shrink with the
 // distance. The carrion crawler hangs from the ceiling (83 - yy[dist]); the mimic looks like
 // a chest.
-int akworld::drawmonsters(int type, int dist)
+int akworld::drawmonsters(int type, int dist)           // 00D244
 {
     int y;
     int x;
@@ -828,9 +842,11 @@ int akworld::drawmonsters(int type, int dist)
 }
 
 // The player attacks the square ahead. Weapons: R rapier (fighters only), A axe (swing, or
-// throw it), S shield, B bow (fighters only, range 5), M the magic amulet; any other key fights
-// with bare hands. A mage chooses the amulet's spell, a fighter gets a random one.
-int akworld::attack(charsave::savestruct &player)
+// throw it: range 5, the axe is lost), S shield, B bow (fighters only, range 5), M the magic
+// amulet; any other key fights with bare hands. A mage chooses the amulet's spell, a fighter
+// gets a random one. target is the monster hit, damage first the weapon's damage, then the
+// damage done. The range check's fourth test is mistyped (FINDINGS).
+int akworld::attack(charsave::savestruct &player)       // 016C28
 {
     int target = 0;
     int damage = 0;
@@ -1044,10 +1060,13 @@ hit:
     return 0;
 }
 
-// The monsters' turn. A monster next to the player attacks, unless it is too weak (then it
-// flees); a thief or a gremlin may steal instead. The others walk towards the player, the
-// mimic stays put. sgn(z1) is called where a statement does nothing.
-int akworld::movemonsters(charsave::savestruct &player)
+// The monsters' turn. A monster next to the player (not diagonally) attacks, unless it is
+// below 30% of the hit points it started with: then it flees. A thief or a gremlin steals
+// instead 10% of the time. The others step towards the player (away when fleeing): along y if
+// that square is free, else along x; walls, traps and other monsters block. The mimic stays
+// put. nexty and nextx are the squares one step along y and along x. sgn(nexty) is called
+// where a statement does nothing.
+int akworld::movemonsters(charsave::savestruct &player) // 018194
 {
     int m;
     int stepx;
@@ -1161,7 +1180,8 @@ stay:
     return 0;
 }
 
-int akworld::sgn(int n)
+// The BASIC's SGN.
+int akworld::sgn(int n)                                 // 019700
 {
     if (n > 0) return n = 1;
     if (n < 0) return n = -1;
@@ -1169,9 +1189,10 @@ int akworld::sgn(int n)
     return n;
 }
 
-// The introduction's demonstration: a cursor walks a little map by the script in str (A up,
-// B down, C right, D left, W wait) until a key is pressed.
-int akworld::viewintro(charsave::savestruct &player)
+// The introduction's demonstration, never called: a cursor walks a little map by the script
+// in str (A up, B down, C right, D left, W wait) until a key is pressed. It sets the akworld's
+// own sav, which nothing else uses.
+int akworld::viewintro(charsave::savestruct &player)    // 0197D4
 {
     char str[] = "AACCWWWDDBBWWWCCWWWWWWDDWWW";
     int i = 1;

@@ -25,8 +25,9 @@ charsave::~charsave()                                   // 004FB4
 {
 }
 
-// Character creation: the lucky number seeds the random numbers, the stats are rolled as in the
-// Apple original, INT(SQR(RND(1))*21+4).
+// Character creation: the lucky number seeds random(), and the stats are rolled as in the
+// Apple original, INT(SQR(RND(1))*21+4), with 100 steps instead of RND's: 4 to 24, high values
+// likelier. Each refusal rolls six more from the same sequence (tools/akmap.py stats LUCKY).
 void charsave::charcreate()                             // 005134
 {
     int i = 0;
@@ -93,7 +94,7 @@ void charsave::charcreate()                             // 005134
 }
 
 // The Adventure Shop. With mode -1 it only shows the stats and items and waits for a key.
-// A mage is told he cannot use the rapier or the bow, but the purchase goes through anyway:
+// A mage is told they cannot use the rapier or the bow, but the purchase goes through anyway:
 // the flag `ok` is cleared and never looked at (the test after the switch reads `key`).
 int charsave::shop(int mode)                            // 0056B8
 {
@@ -264,10 +265,14 @@ int charsave::loadgame()                                // 0061C4
 }
 
 // Lord British. The speeches come from AK.DAT (AKLB1-3): one line per ';', a line holding '`' is
-// left out (or would be: the else only sets a flag that is already set), '~' ends a page and
-// ')' marks where the quest's monster is named. On the first visit he asks the name and gives
-// a quest (wisdom / 3, at most 10); later he checks it. Returning at the first '~' leaves the
-// datafile loaded.
+// left out (the else only sets a flag that is already set), '~' ends a page. The quest's
+// monster is printed at a fixed place for every line WITHOUT a ')' (the test looks inverted,
+// but the place is the same each time). On the first visit he asks the name and, if the
+// player wants adventure, raises every stat by 1 and gives a quest: monster wisdom / 3, at
+// most 10. Later visits check it: a finished quest (negative task) raises every stat by 1
+// again and gives the next monster; after the balrog the task stays -10, so every later visit
+// raises the stats again. Returning at the first '~' leaves the datafile loaded, and the
+// function falls off its end without a return value.
 int charsave::lb()                                      // 0064CC
 {
     int row = 0;
@@ -407,8 +412,9 @@ int charsave::lb()                                      // 0064CC
     unload_datafile(dat);
 }
 
-// Called every turn: food (every turn on the surface, every 5th in a dungeon), starvation and
-// death, and the status lines. Returns 2 when the player died, else 1.
+// Called every turn, i.e. after every key, whatever it did: food (one unit every turn on the
+// surface, every 5th turn in a dungeon), starvation (food at 0) and death (hit points at 0 or
+// below), and the status lines, values of 10 or less in red. Returns GAME_DEAD or 1.
 int charsave::checkstatus()                             // 006C98
 {
     char num[8];

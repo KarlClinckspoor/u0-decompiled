@@ -18,7 +18,7 @@
 // the game and 2 when the character has died.
 // player is the character, w the world (an akworld holds a second charsave as its base, which
 // the game never uses).
-int rungame(charsave &player, akworld &w)
+int rungame(charsave &player, akworld &w)               // 001600
 {
     int key = 0;
     int ky1 = 0, ky2 = 0;
@@ -165,7 +165,7 @@ int rungame(charsave &player, akworld &w)
 
 // One move in the dungeon per key: arrows, Alt+Left/Right strafe, Alt+Down retreats. Returns 0
 // when the player leaves the level (ladder, trap) or loads a game, 1 at the end, 2 on death.
-int rundungeon(charsave &player, akworld &w)
+int rundungeon(charsave &player, akworld &w)            // 001ED4
 {
     int i = 0;
     int gold;
@@ -401,7 +401,7 @@ int rundungeon(charsave &player, akworld &w)
 
 // The menu, then the world map and the dungeons in turn until the game ends; a death goes back
 // to the menu. argv[0] tells Allegro where to find SETUP.EXE's sound configuration.
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])                        // 003834
 {
     int result = 0, r2 = 0;
     char *item[] = {"", "   Introduction", "Create a Character", " Acknowledgements", "  Journey Onward", "    View Quotes", "    View Ending"};

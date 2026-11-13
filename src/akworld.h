@@ -8,20 +8,20 @@
 class akworld : public charsave
 {
 public:
-    int world[21][21];              // the world map: 1 mountain, 3 town, 4 dungeon, 5 castle
-    int dng[11][11];                // the dungeon level: 1 wall, 2 trap, 5 gold, 7/9 ladder down, 8 up
+    int world[21][21];              // the world map [x][y], LAND_* (akdefs.h)
+    int dng[11][11];                // the dungeon level [x][y], DG_* plus DG_MONSTER * monster
     int mdraw;                      // 1 while drawdungeon should draw the monsters
-    int color;
-    int run1;
-    BITMAP *worldbmp;
+    int color;                      // the dungeon's drawing colour: level + 30
+    int run1;                       // 1 when a monster fled this turn: redraw the view
+    BITMAP *worldbmp;               // the view: the top 320x166 pixels of the screen
     MIDI *backmid;                  // the music playing
-    int per[11][4];
+    int per[11][4];                 // the perspective tables, see the constructor
     int cd[11][4];
     int lad[11][4];
     int ld[11][6];
     int ft[11][6];
     int xx[11], yy[11];
-    int mz[11][2], ml[11][2];
+    int mz[11][2], ml[11][2];       // per monster: alive, hit points; its square x, y
 
     akworld();
     ~akworld();
