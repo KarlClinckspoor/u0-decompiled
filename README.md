@@ -9,7 +9,7 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 
 | file | what | status |
 |---|---|---|
-| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **links with identical code and data** (phase 3): every library object rebuilt or shipped identical, the game in C++ under way: akmenu.cc, akaux.cc and akchar.cc match (code and symbols), ak.cc and akworld.cc are still generated assembly stand-ins (`src/standin/`) |
+| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **links with identical code and data** (phase 3): every library object rebuilt or shipped identical, the game in C++ under way: akmenu.cc, akaux.cc, akchar.cc and ak.cc match (code and symbols; for ak.cc also its debug information and line numbers), akworld.cc is still a generated assembly stand-in (`src/standin/`) |
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
 | SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
 

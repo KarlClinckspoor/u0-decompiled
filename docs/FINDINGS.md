@@ -22,6 +22,13 @@ play**, unless marked otherwise.
   the others `if (skip == 0) print; else skip = 1;` sets a flag that is already set.
 - **Bitwise `&` and `|` for logic** (akmenu.cc, akaux.cc, akchar.cc). The tests are written
   `a == 1 & b != 1`. Each side is 0 or 1, so this works, but it always evaluates both sides.
+- **The menu leaks MIDIs** (ak.cc `main`). Every pass of the menu loop loads intro.mid into
+  `w.backmid`, but only Acknowledgements and View Quotes destroy it first. Introduction, View
+  Ending (which also leaves lordbrit.mid behind) and Create a Character each leave one loaded.
+- **Gold always comes with an item** (ak.cc `rundungeon`). The test `if (gold > 0)` can't fail:
+  the amount is `rand() % (5 * level) + level` with a dungeon level of at least 1.
+- Oddities in ak.cc: `rungame` counts moves in `i` and declares `char string[10]`, and uses
+  neither; in the dungeon, `y` is a case of its own that does nothing.
 - `lb()` and `death()` are reached as `int` functions that fall off their end (`lb`) or return
   nothing (`death` is void); `lb`'s return value is garbage when it falls off the end.
 
@@ -43,4 +50,23 @@ play**, unless marked otherwise.
 - **AK.DAT texts**: one line per `;`, a page break at a line holding `~`. In Lord British's
   speeches a line holding `)` is where the monster's name is printed, and `` ` `` marks a line
   to skip.
+- **Keys on the world map** (ak.cc `rungame`): the arrows walk, and mountains (map value 1) block
+  with a beep. `E` or `X` acts on the square: 3 a town, i.e. the shop; 5 the castle, i.e. Lord
+  British; 4 a dungeon. `Q` or Ctrl-S saves, Ctrl-R loads, `Z` shows the stats. Ctrl-Q or
+  Ctrl-E ends the game without saving. Every key is a turn (`checkstatus`).
+- **Keys in the dungeon** (ak.cc `rundungeon`): up moves forward and down turns around. Left and
+  right turn, Alt+Left and Alt+Right strafe, Alt+Down retreats (BIOS codes 155, 157, 160). A wall
+  is map value 1, and values of 10 and up block too. `E`, `K` or `X` climbs: 7 or 9 is a ladder
+  down, 8 a ladder up, and 8 on level 1 is the exit. `A` attacks, `Z` shows the stats, space
+  waits. Ctrl-R loads; `Q`, `q` and Ctrl-S answer "Can Not Save in Dungeons!".
+- **Entering a dungeon** puts the player on level 1 at (1,1), facing `dx = 1` (shown as
+  "South"), and sets `lk` to 0. **Leaving** adds `lk` to the hit points (`lk` is presumably
+  raised in combat, in akworld.cc).
+- **Traps** (map value 2, never cleared): the player takes `rand() % level + 3` hit points of
+  damage and falls one level.
+- **Gold** (map value 5, cleared when found): `rand() % (5 * level) + level` pieces, and always
+  one item, `rand() % 6`: one unit of food, a rapier, an axe, a shield, a bow or an amulet.
+- **Death** (`checkstatus` returning 2) goes back to the menu. Choosing "Journey Onward" without
+  a PLAYER.U0 leads to character creation (`loadgame` returns 1). "View Ending" sets the level
+  of play to 10 and the quest to finished, then plays Lord British's last speech.
 - **The quotes and credits** (akaux.cc) scroll one pixel per 100 ms until a key is pressed.

@@ -230,7 +230,7 @@ class Coff:
             elif kind == 2:
                 b += ' ()'
             elif kind == 3:
-                suffix = ('[%d]' % dims.pop(0) if dims else '[]') + suffix
+                suffix += '[%d]' % dims.pop(0) if dims else '[]'     # dims run outermost first
         return b + suffix
 
     def types(self, obj):

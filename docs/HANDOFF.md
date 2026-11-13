@@ -3,7 +3,8 @@
 State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
 `.text` and `.data` identical to the original**, from the real libraries and assembly
 stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc,
-akaux.cc and akchar.cc match completely, symbols included. Read this first, then
+akaux.cc, akchar.cc and ak.cc match completely, symbols included (ak.cc's `-g` debug symbols and
+line numbers too). Only akworld.cc is left. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -78,11 +79,13 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | akmenu.cc | **done**: `src/akmenu.cc` + `src/akmenu.h`. All 5 functions and the inline textout copy match, and all 53 symbols (label numbers included) are the original's. Stand-in deleted. The link stays identical |
 | akaux.cc | **done**: `src/akaux.cc` + `src/akaux.h` + `src/ak.h` (AK.DAT's object indexes). All 6 functions, the quote and credit tables, the two inline copies and all 158 symbols match. Stand-in deleted |
 | akchar.cc | **done**: `src/akchar.cc` + `src/akchar.h`. All 9 functions (character creation, shop, save/load, Lord British, upkeep, death) and all 249 symbols match. Stand-in deleted. The tricky part, end-of-function dead jumps that depend on the functions before them, is explained in MATCHING.md |
-| ak.cc, akworld.cc | stand-ins (regenerated: local pointer tables are now relocations too) |
+| ak.cc | **done**: `src/ak.cc` + `src/akworld.h`. Compiled `-O0 -g`. All 3 functions (`rungame`, `rundungeon`, `main`) and the textout copy match. So do the 185 label symbols, all 1179 debug symbols (types, locals, blocks, `.bf`/`.ef`) and all 316 line numbers. Stand-in deleted |
+| akworld.cc | stand-in |
 
 `python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
-names, strings and switch tables. `tools/gxx.py src/NAME.cc` compares functions, and also
-symbols when the file is a whole object.
+names, strings, switch tables and, for ak.cc, the source line of each statement.
+`tools/gxx.py src/NAME.cc` compares functions, and also symbols when the file is a whole object.
+For a `-g` object it also compares every debug symbol and the line numbers (`DEBUG`, `LINES`).
 
 ## Repository
 
@@ -194,8 +197,9 @@ python tools/libmatch.py --quiet # all library objects identical
 python tools/build.py            # SECTIONS IDENTICAL to the original COFF
 ```
 
-1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc, akaux.cc and akchar.cc (done), then ak.cc (10 KB, with `-g`: its line numbers
-   fix the source's line layout), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB).
+1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc, akaux.cc,
+   akchar.cc and ak.cc (done), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB). Its
+   function return types are still guesses in `src/akworld.h` (ak.cc never uses them).
    - Loop per function: `tools/gxx.py src/akmenu.cc`.
    - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the
      stand-in, and the sections must stay identical. Delete the stand-in then.
@@ -204,5 +208,5 @@ python tools/build.py            # SECTIONS IDENTICAL to the original COFF
      conventions (lesson 11 of docs/PLAN.md).
 2. Then the symbol table: with all five objects in C++ (ak.cc with `-g`), compare the whole
    COFF, symbols and line numbers included.
-4. Optional, any time: a disassembly of `rungame` beside its line table to see how the source's
-   statements map to code (`coff.py` has the lines; a small `tools/lines.py` would print them).
+3. With ak.cc done, the symbol table differs only by akworld.cc's stand-in symbols (9337 symbols
+   against 9382; the line numbers, 316, are already complete).

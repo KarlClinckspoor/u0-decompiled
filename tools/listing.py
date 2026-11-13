@@ -27,6 +27,27 @@ def text_of(b):
     return '"' + out + '"'
 
 
+def line_table(c):
+    """vaddr -> source line, from the COFF line numbers (relative to each function's .bf)."""
+    out = {}
+    base = None
+    for sec, addr, ln in c.lines:
+        if ln == 0:
+            fn = c.byindex[addr]
+            base = None
+            k = fn.index + 1 + len(fn.aux)
+            while k in c.byindex and k < fn.index + 8:
+                s = c.byindex[k]
+                if s.name == '.bf':
+                    base = struct.unpack_from('<H', s.aux[0], 4)[0]
+                    break
+                k += 1 + len(s.aux)
+            out[fn.value] = base
+        elif base is not None:
+            out[addr] = base + ln - 1
+    return out
+
+
 def main():
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
@@ -43,6 +64,7 @@ def main():
         if e:
             return coff.dm(e[0]) + ('+%d' % e[1] if e[1] else '')
         return None
+    lines = line_table(ak)
     funcs = [(s.value, s) for s, _ in ak.functions(g.obj)]
     funcs += [(v, s) for v, s in g.own.items() if s.sclass == 6 and '__F' in s.name]   # inline copies
     funcs.sort()
@@ -58,6 +80,8 @@ def main():
         lab = g.own.get(pc)
         if pc in g.code:
             i = g.code[pc]
+            if show and pc in lines:
+                print('; line %s' % lines[pc])
             if show:
                 if lab and lab.sclass == 6 and not lab.name.startswith('_'):
                     print('%s:' % lab.name)

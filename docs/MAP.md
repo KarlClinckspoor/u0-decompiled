@@ -133,19 +133,19 @@ class charsave {               /* 128 bytes */
     savestruct sav;            /*   0 */
     int count;                 /* 124 */
 };
-class akworld : charsave {     /* 3716 bytes; the base is the member named "charsave" at 0 */
+class akworld : public charsave {  /* 3716 bytes; the base is the member named "charsave" at 0 */
     int world[21][21];         /*  128 */
     int dng[11][11];           /* 1892 */
     int mdraw, color, run1;    /* 2376, 2380, 2384 */
     BITMAP *worldbmp;          /* 2388 */
     MIDI *backmid;             /* 2392 */
-    int per[4][11];            /* 2396 */
-    int cd[4][11];             /* 2572 */
-    int lad[4][11];            /* 2748 */
-    int ld[6][11];             /* 2924 */
-    int ft[6][11];             /* 3188 */
+    int per[11][4];            /* 2396 */
+    int cd[11][4];             /* 2572 */
+    int lad[11][4];            /* 2748 */
+    int ld[11][6];             /* 2924 */
+    int ft[11][6];             /* 3188 */
     int xx[11], yy[11];        /* 3452, 3496 */
-    int mz[2][11], ml[2][11];  /* 3540, 3628 */
+    int mz[11][2], ml[11][2];  /* 3540, 3628 */
 };
 class akmenu { int t1, t2, pos, max; };   /* 16 bytes */
 class akaux { };                          /* 1 byte: no members */
@@ -159,7 +159,16 @@ class akaux { };                          /* 1 byte: no members */
 | rundungeon | from 169 | player +8, w +C | i -4, gold -8, key -C, ky1 -10, ky2 -14, result -18, string char[4] -1C, item char*[6] -34 |
 | main | from 405 | argc +8, argv +C | result -4, r2 -8, item char*[7] -24, aux (akaux) -28, player (charsave) -A8, w (akworld) -F2C, menu (akmenu) -F3C |
 
-The debug information shows references as pointers (C++ `&` has no COFF type).
+The debug information shows references as pointers (C++ `&` has no COFF type). The array
+dimensions above are as ak.cc's debug symbols store them, outermost first (an earlier version of
+`coff.py types` printed them reversed; `src/ak.cc`'s debug symbols match only with
+`per[11][4]` and so on).
+
+`src/ak.cc` rebuilds this object completely, debug information included. Its line numbers fix
+where every statement stands in the file, so the original's layout is known down to the line.
+`rundungeon` spills every temporary to the frame (`[ebp-0x40]` and below) and `main` spills one,
+while `rungame` keeps them in registers. gcc does this by itself; nothing in the source asks for
+it.
 
 ## Code fingerprints (for choosing compiler flags)
 

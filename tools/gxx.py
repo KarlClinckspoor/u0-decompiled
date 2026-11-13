@@ -16,6 +16,7 @@ Exit status: 0 when every function matches.
 import argparse
 import os
 import shutil
+import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -159,6 +160,102 @@ def compare(objpath, ak, verbose=False):
                 first = next(((x, y) for x, y in zip(a, b) if x != y), (len(a), len(b)))
                 print('  SYMBOLS  differ from %s: first original %s, mine %s' % (ob.name, first[0], first[1]))
                 ok = False
+            if o.lines or any(s.sclass in (100, 101) for s in o.syms):
+                ok = compare_debug(o, ak, ob, base) and ok
+    return ok
+
+
+def _debug_view(c, syms, base, line0):
+    """The symbol table of one object as comparable tuples, and its line numbers.
+
+    Symbol indices inside aux entries (tag, .bf, end-of-scope indices) become positions in the
+    object's own list, line-number pointers become entry numbers counted from the object's first
+    line entry, and .text values become offsets in the object: what the link changes goes."""
+    syms = [s for s in syms if not (s.sclass == 2 and s.sec == 0)]      # undefined externals
+    local = [s for s in syms if s.sclass != 2]
+    glob = [s for s in syms if s.sclass == 2]
+    key = {s.index: k for k, s in enumerate(local)}
+    key.update({s.index: 'G:' + s.name for s in glob})
+    lsec = next(sec for sec in c.sections if sec['name'] == '.text')
+
+    def idx(v):
+        return key.get(v, v if v == 0 else '?%d' % v)
+
+    def view(s):
+        value = s.value - base if s.sec == 1 else s.value
+        if s.sclass == 103 or (s.sclass == 3 and s.sec in (2, 3)):
+            value = None                        # .file: the next .file's index; .data/.bss: placed by ld
+        aux = []
+        for a in s.aux:
+            fn = (s.type >> 4) & 3 == 2
+            if s.sclass in (102,) or fn or ((s.type & 15) in (8, 9, 10) and s.sclass not in (10, 12, 15)):
+                t0 = idx(struct.unpack_from('<I', a, 0)[0])
+            else:
+                t0 = a[0:4].hex()
+            if fn:
+                ptr = struct.unpack_from('<I', a, 8)[0]
+                mid = (a[4:8].hex(), (ptr - lsec['lnnoptr']) // 6 - line0 if ptr else 0)
+            else:
+                mid = a[4:12].hex()
+            if s.sclass in (10, 12, 15) or fn or (s.sclass in (100, 101) and s.name in ('.bb', '.bf')):
+                t12 = idx(struct.unpack_from('<I', a, 12)[0])
+            else:
+                t12 = a[12:18].hex()
+            if s.sclass == 3 and s.name in ('.text', '.data', '.bss'):
+                mid, t12 = '', ''               # relocation and line counts: linked away
+            aux.append((t0, mid, t12, a[16:18].hex() if fn else ''))
+        return (s.name, value, s.sec, s.type, s.sclass, tuple(aux))
+    return [view(s) for s in local], {s.name: view(s) for s in glob}, idx
+
+
+def compare_debug(o, ak, ob, base):
+    """Compare the debug symbols and line numbers of a -g object with the original's."""
+    ok = True
+    text = next(sec for sec in ak.sections if sec['name'] == '.text')
+    # the object's line entries in AK.COF: from its first function's entry to its .text end
+    lo, n = ob.text
+    first = None
+    for k, (sec, addr, ln) in enumerate(ak.lines):
+        if sec != '.text':
+            continue
+        if (ln == 0 and ak.byindex[addr].obj is ob) or (ln and lo <= addr < lo + n):
+            if first is None:
+                first = k
+            last = k
+    first_ak = first if first is not None else 0
+    mine_l, mine_g, mine_idx = _debug_view(o, o.syms, 0, 0)
+    orig_l, orig_g, orig_idx = _debug_view(ak, ob.syms, base, first_ak)
+    if mine_l == orig_l and mine_g == orig_g:
+        print('  DEBUG    symbols identical (%d local, %d global)' % (len(orig_l), len(orig_g)))
+    else:
+        ok = False
+        k = next((k for k, (x, y) in enumerate(zip(orig_l, mine_l)) if x != y), None)
+        if k is None and len(orig_l) != len(mine_l):
+            k = min(len(orig_l), len(mine_l))
+        if k is not None:
+            print('  DEBUG    symbols differ at local %d of %d/%d:' % (k, len(orig_l), len(mine_l)))
+            for j in range(max(0, k - 2), k + 3):
+                print('     orig %s' % (orig_l[j],) if j < len(orig_l) else '     orig -')
+                print('     mine %s' % (mine_l[j],) if j < len(mine_l) else '     mine -')
+        for name in sorted(set(orig_g) | set(mine_g)):
+            if orig_g.get(name) != mine_g.get(name):
+                print('  DEBUG    global %s: orig %s, mine %s' % (name, orig_g.get(name), mine_g.get(name)))
+    # line numbers: function entries refer to symbols, the others to addresses
+    def lines(c, idxf, b, rng):
+        out = []
+        for k, (sec, addr, ln) in enumerate(c.lines):
+            if sec == '.text' and rng[0] <= k <= rng[1]:
+                out.append((idxf(addr), ln) if ln == 0 else (addr - b, ln))
+        return out
+    lm = lines(o, mine_idx, 0, (0, len(o.lines)))
+    la = lines(ak, orig_idx, base, (first_ak, last if first is not None else -1))
+    if lm == la:
+        print('  LINES    identical (%d)' % len(la))
+    else:
+        ok = False
+        k = next((k for k, (x, y) in enumerate(zip(la, lm)) if x != y), min(len(la), len(lm)))
+        print('  LINES    differ at entry %d of %d/%d: orig %s, mine %s'
+              % (k, len(la), len(lm), la[k] if k < len(la) else '-', lm[k] if k < len(lm) else '-'))
     return ok
 
 

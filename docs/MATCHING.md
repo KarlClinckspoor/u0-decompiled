@@ -148,6 +148,46 @@ the full file does not have.
   mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`. The table (absolute addresses of the cases)
   sits in `.text` right after the `jmp`, aligned to 4.
 
+### Debug information (ak.cc, `-g`)
+
+`-g` changes no code (`rungame` matched at once), but it records a lot, and all of it can be
+matched. `tools/gxx.py` compares every debug symbol (`DEBUG`) and the line numbers (`LINES`) when
+the object has them. `tools/listing.py` prints the line before each statement.
+- **Line numbers** place every statement on its line. Statements on one line share an entry.
+  Case labels, declarations without an initialiser, braces and `else` get none. The function's
+  `.bf` line is its `{`. A `for` loop's increment gets the line of the body's closing `}`.
+  Everything else is free: the comments and blank lines in `src/ak.cc` fill exactly the gaps
+  the line table leaves. Where code shares a line in the original (`case 80: player.sav.dx = ...`,
+  `case 'y': break;`), it has to share a line in the source too.
+- **The types** come out in the order of their definitions, headers included. The anonymous
+  structs of stdlib.h come first, then libio's, then math.h's `exception`, then dpmi.h's (pulled
+  in by allegro.h), then Allegro's. So ak.cc includes stdlib.h, iostream.h, math.h and allegro.h
+  in that order. The textout copy's label (L278) confirms it.
+- **Array dimensions** are stored outermost first: akworld's `per` is `int[11][4]`.
+- **Blocks** (`.bb`/`.eb`) come from binding levels that hold declarations or other blocks.
+  `main` also has empty ones, a `.bb` and `.eb` at the same address, at each `break` of its menu
+  switch. They are not in the source: `expand_fixup` (stmt.c) makes one for every forward jump
+  when an object with a destructor is live (`aux`, `player`, `w`, `menu`). gcc reproduces them.
+
+### Constant folding moves constants
+
+gcc's `fold` reassociates `+`/`-` with a constant, so where the constant ends up in the code
+tells the source form. With the call to `rand()` evaluated first:
+- `a - 3 - b` becomes `a - (b + 3)`: `lea esi,[ebx+3]; sub eax,esi`;
+- `a - b - 3` becomes `(a - b) + -3`: `sub; add -3`;
+- `a - (b + 3)` becomes `(a - 3) - b`: `add ecx,-3` before the division, then `sub`. This is
+  `rundungeon`'s trap damage, `character[0] - (rand() % inout + 3)`, the Apple original's
+  `C(0)-INT(RND(1)*IN+3)` form.
+
+### The order of label symbols shows the order of case labels
+
+gas enters a local label into the symbol table when it first sees it, defined or referenced.
+A switch's dispatch (the decision tree or the jump table) comes before the cases. So the labels
+of a group like `case 'X': case 'x': case 'E': case 'e':` are listed in the order of the case
+values (`E e X x`), while their numbers follow the order of the source. `gxx.py`'s SYMBOLS check
+sorts by address and misses this; the DEBUG check compares the symbol table in order and finds
+it. In ak.cc: `X x E e` on the world map, `X x K k E e` in the dungeon, `Q q 19` for saving.
+
 ## The link (proven in phase 3)
 
 gcc 2.7.2.1 links with
