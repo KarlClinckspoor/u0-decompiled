@@ -33,7 +33,8 @@ running game yet. docs/FINDINGS.md lists the bugs, each to be marked "checked in
 5. **The game loop** alternates between the world map (`rungame`) and the dungeon
    (`rundungeon`). Each runs until the player changes place (enters or leaves a dungeon,
    changes level, loads a game), dies, or quits:
-   - a death goes back to the menu (the character in memory is gone; PLAYER.U0 is not touched);
+   - a death goes back to the menu; PLAYER.U0 is not touched, so Journey Onward goes on from
+     the last save;
    - Ctrl-Q or Ctrl-E ends the program at once, without saving.
 6. Every time the dungeon loop starts, the current level and its monsters are made anew
    ([dungeon.md](dungeon.md)).
