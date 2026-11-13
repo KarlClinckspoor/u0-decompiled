@@ -88,7 +88,7 @@ Read from fragments that survive the compression (to be confirmed after unpackin
 | file | bytes | what |
 |---|---|---|
 | AK.DAT | 17241 | **Allegro datafile**, LZSS-packed (`slh!`, then `ALL.`), made with the grabber on 11-15-1997. Probably fonts, pictures and palette. Easy to read in Python (Allegro 2.2's `packfile.c` is the reference). |
-| SETUP.EXE | 190043 | Allegro's stock sound-setup program (`setup/setup.c` in Allegro 2.2), same WDOSX wrapper. A cheap bonus target once Allegro rebuilds. |
+| SETUP.EXE | 190043 | Allegro's stock sound-setup program (`setup/setup.c` in Allegro 2.2), same WDOSX wrapper. Not a target (Karl, 2026-11-13). |
 | SOUND.CFG | 126 | Allegro sound configuration (written by SETUP) |
 | INTRO/SHOP/OVER/DUNGEON/LORDBRIT.MID | 3-6 KB | background music, from earlier Ultimas (WHATS.NEW) |
 | QUOTES.FLG, ENDGAME.FLG | (not shipped) | zero-byte files that unlock the menu's "View Quotes" and "View Ending" (WHATS.NEW) |
@@ -176,8 +176,8 @@ SOUND.CFG), with `tools/akdat.py` rendering the pictures to build/ (never commit
 COFF in DOSBox. If its output is identical (same kernel, same compression), the build is complete
 with period tools. If not, write `tools/postlink.py` in the U1/U2 style: it takes the kernel and
 stub bytes from gamedata at build time and re-packs our COFF with a Python port of the packer, and
-the bytes copied are never committed. Gate: AK.EXE sha1 `756637c8...`. Optional: SETUP.EXE the
-same way (Allegro's setup.c plus its link). Optional, if Karl has an Ultima IX or Ultima
+the bytes copied are never committed. Gate: AK.EXE sha1 `756637c8...`. (SETUP.EXE the same way
+was considered and dropped: Karl decided it isn't needed.) Optional, if Karl has an Ultima IX or Ultima
 Collection CD: compare with Origin's original stubified AK.EXE and add a "as Origin shipped it"
 target.
 

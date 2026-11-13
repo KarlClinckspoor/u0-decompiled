@@ -11,7 +11,7 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 |---|---|---|
 | AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **rebuilds identical, sha1 756637c8...** (phases 4 and 7): the five game files in C++ (`src/`), the rebuilt Allegro and the shipped DJGPP libraries give the program, AK.COF, byte for byte (symbol table and debug information included). `tools/postlink.py` then wraps it with WDOSX's packer, ported to Python, taking the WDOSX kernel and stub from the GOG file at build time |
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
-| SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
+| SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | not a target |
 
 The plan is docs/PLAN.md; the current state and next steps are in docs/HANDOFF.md.
 

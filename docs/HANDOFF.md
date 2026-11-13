@@ -1,142 +1,184 @@
 # Handoff: Akalabeth decompilation (u0-decompiled)
 
-State as of 2026-11-13: phases 0 to 4 and 7 of docs/PLAN.md are done. **AK.EXE rebuilds
-identical byte for byte** (sha1 756637c8...). The five game files in C++ (`src/`), the
-rebuilt Allegro and the shipped DJGPP libraries give AK.COF, identical down to the symbol
-table and line numbers. The post-link step then wraps it the way WDOSX 0.97's stubit does,
-with the WDOSX kernel and stub copied from gamedata at build time. Next: the readable and
-mechanics passes (phases 5 and 6). Read this first, then
-docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
-model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
+State as of 2026-11-13. Read this first, then docs/MATCHING.md (how to change the source
+without breaking the match), docs/MAP.md (what is in AK.EXE) and docs/FINDINGS.md (what the
+code revealed). docs/PLAN.md is the original plan, phases 0-8.
 
-## Headline
+## Where it stands
 
-- **AK.EXE is unpacked.** `tools/wdosx.py` reads the WDOSX 0.97 wrapper and unpacks the DJGPP
-  COFF program to `build/AK.COF` (570462 bytes, sha1 3badf300cef0032f57b12468b51b448c3926bcab).
-  The LZ decoder is the one the WDOSX kernel uses on itself, read from the kernel's 16-bit code
-  at 0083. It also unpacks the kernel image. Every chunk ends exactly where the next begins.
-  WDOSX's source was not needed.
-- **The program is not stripped**, and that changes the size of the job (docs/MAP.md):
-  - 268 objects in link order, each with its exact `.text`/`.data`/`.bss` range;
-  - every function and variable named; C++ names demangle to classes, methods and argument
-    types (`tools/coff.py` has a gcc 2.x demangler);
-  - every local label (`L402`, `LC7`) kept;
-  - **ak.cc was compiled with `-g`**: the game's class layouts with member names, locals with
-    frame offsets, and 316 line numbers.
-- **The game is 5 objects, 36 functions, 100132 bytes of `.text`** (code and literals), and has
-  no `.data` or `.bss` of its own. The rest is library code: Allegro 2.2 (113 KB), libgpp/libio
-  (57 KB), libgcc and the DJGPP 2.01 libc (59 KB), plus crt0. Two functions dominate:
-  `akworld::drawmonsters` (39 KB) and `akworld::drawdungeon` (14 KB).
-- The member names are Garriott's Applesoft variables (TX, TY, PX, PY, INOUT, TASK, LK, PER, LAD,
-  FT, XX, YY, MZ, ML, ...). The Apple II listing will be a strong naming reference.
+**AK.EXE rebuilds identical to the GOG file, byte for byte** (238962 bytes, sha1
+`756637c80622b84b8167f8bc4192e221ac50187d`), from:
+- the game in C++ (`src/`, five files, 36 functions);
+- Allegro 2.2, rebuilt from its source as the game's copy was built;
+- DJGPP 2.01's libc, libgcc, libg++ 2.7.1's libiostr and crt0, linked as shipped;
+- the WDOSX 0.97 kernel and stub, copied from gamedata at build time.
 
-## Facts learned (beyond the plan's survey)
+The program inside (AK.COF) is identical down to its 9382 symbols, ak.cc's debug
+information and the 316 line numbers. The compiler is gcc 2.7.2.1 for DJGPP at `-O0`
+(ak.cc with `-g`), assembled with binutils 2.8.1, in headless DOSBox.
 
-- The WFSE entry header is `WFSE`, entry size, unpacked size, a dword 0x26 (meaning unknown),
-  and a 16-byte name field. The bytes after the name's zero are junk that differs between AK.EXE
-  and SETUP.EXE (`0600b9020000` and `0600 8c060000`), probably stack leftovers in WDOSX's
-  `stubit`. Phase 7 has to reproduce or copy them.
-- A chunk that does not get smaller is stored as it is (two in SETUP.EXE).
-- COFF timestamp is 0 and there are no relocations: nothing time-dependent in the link.
-- Code fingerprints are in docs/MAP.md. The game has a frame pointer, uses register variables
-  and aligns functions to 4 (no `-m486`). Allegro was built `-fomit-frame-pointer`. The doubles
-  a function uses are in `.text` just before it. akmenu.cc has its own copy of the header inline
-  `textout(BITMAP *, FONT *, char *, int, int, int)` (as a local label), and so does ak.cc (as
-  STAT).
-- AK.DAT (`tools/akdat.py`): one `slh!` LZSS packfile around an `ALL.` datafile of 7 objects:
-  `akins` (the instructions), `aklb1`-`aklb3` (Lord British's speeches), fonts `ARIAL_BLACK`
-  and `NEAT_FONT` (proportional, from PCX files), and the grabber's info. The ORIG properties
-  show the game was built in `c:\djgpp\bin`, with a grabber header `c:\djgpp\bin\ak.h`, dated
-  13-20 November 1997.
-- SETUP.EXE's COFF is stripped (no symbols). It is Allegro 2.2's stock setup program.
-
-## Phase 3 (done 2026-11-13): every library object identical, sections link identical
-
-- `python tools/buildalleg.py` builds Allegro 2.2's liballeg.a with its own makefile (binutils
-  2.7 first on `COMPILER_PATH`; make 3.75 misses `asmdef.c` through VPATH, so the script builds
-  and runs asmdef first). It takes about 45 s.
-- `python tools/libmatch.py` pairs every object of AK.COF with a library member **by symbol**
-  and compares `.text`/`.data` (relocated fields masked) and `.bss` size. Result: **all 257
-  library objects identical**: crt0, 187 libc.a (stubs included), 7 libgcc.a, 22 libiostr.a,
-  40 liballeg.a. 6 objects are empty and 5 are the game.
-- `python tools/standin.py` writes `src/standin/ak*.s`. Each is a gas source with the game
-  object's original bytes, where every address is a relocation: `.long _screen`, `.long LC12`,
-  `call _textout`, and switch tables as `.long L…`. Code is found by following control flow.
-  At `-O0`, gcc 2.7.2.1 compiles a switch as `mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`,
-  bounded by the `cmp` before it. Every code label is reached. No constant was mistaken for an
-  address: every target in the object's own code is a real label, and the only external data
-  the game touches are `screen`, `font`, `cout`, `cin` and `__dj_stderr`.
-- `python tools/build.py` assembles the stand-ins (or compiles `src/NAME.cc` once it exists) and
-  links as gcc does: `ld -o ak crt0.o OBJS -lalleg -liostr -Tdjgpp.djl -lgcc -lc -lgcc`. It then
-  compares with AK.COF. **File header, a.out header, section headers, `.text` (331608 bytes)
-  and `.data` (27136 bytes) are identical**, in about 6 s. The symbol table differs (7678
-  symbols against 9382, no line numbers, so ld also sets the F_LNNO flag, 0x107 against 0x103).
-  That is ak.cc's `-g` information and the game's local symbols, which the C++ will bring back.
-
-## Phase 4 (done 2026-11-13): the game in C++
-
-| object | state |
+| phase (docs/PLAN.md) | state |
 |---|---|
-| akmenu.cc | **done**: `src/akmenu.cc` + `src/akmenu.h`. All 5 functions and the inline textout copy match, and all 53 symbols (label numbers included) are the original's. Stand-in deleted. The link stays identical |
-| akaux.cc | **done**: `src/akaux.cc` + `src/akaux.h` + `src/ak.h` (AK.DAT's object indexes). All 6 functions, the quote and credit tables, the two inline copies and all 158 symbols match. Stand-in deleted |
-| akchar.cc | **done**: `src/akchar.cc` + `src/akchar.h`. All 9 functions (character creation, shop, save/load, Lord British, upkeep, death) and all 249 symbols match. Stand-in deleted. The tricky part, end-of-function dead jumps that depend on the functions before them, is explained in MATCHING.md |
-| ak.cc | **done**: `src/ak.cc` + `src/akworld.h`. Compiled `-O0 -g`. All 3 functions (`rungame`, `rundungeon`, `main`) and the textout copy match. So do the 185 label symbols, all 1179 debug symbols (types, locals, blocks, `.bf`/`.ef`) and all 316 line numbers. Stand-in deleted |
-| akworld.cc | **done**: `src/akworld.cc` + `src/akworld.h`. All 12 functions match, among them `drawmonsters` (39 KB, 340 `line()` calls) and `drawdungeon` (14 KB), plus the 4 inline copies (textout, textout_centre, line, putpixel) and all 382 symbols. Written from `tools/pseudo.py`'s output; `drawmonsters` was generated from it by a script. Stand-in deleted |
+| 0-1 survey, unpack | done: `tools/wdosx.py` unpacks AK.EXE; the COFF is not stripped |
+| 2 toolchain | done: gcc 2.7.2.1 + binutils 2.8.1 (game), binutils 2.7 (Allegro) |
+| 3 libraries, link | done: all 257 library objects identical, the link reproduces the layout |
+| 4 the game in C++ | done: akmenu, akaux, akchar, ak (with `-g`), akworld all match, symbols included |
+| 7 the shipped file | done: `tools/postlink.py` with a Python port of WDOSX's packer |
+| 5 readable pass | **open** |
+| 6 mechanics, findings checked in play | **open** (findings so far are read from the code only) |
+| 8 port | optional, not started |
 
-With all five files in C++, `tools/build.py` reports **whole file: IDENTICAL**. AK.COF is
-reproduced completely, symbol table and line numbers included.
+SETUP.EXE (Allegro's stock sound setup, same wrapper) is **not a target**: Karl decided it
+isn't needed.
 
-`python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
-names, strings, doubles, switch tables and, for ak.cc, the source line of each statement.
-`python tools/pseudo.py OBJ [FUNC]` folds the -O0 code back into C-like pseudo code: registers,
-spill slots and the x87 stack become expressions, member accesses get names and array indexes,
-one line per store, call or branch (`PSEUDO_TEMPS=94,90` forces frame slots to be temporaries).
-`tools/gxx.py src/NAME.cc` compares functions, and also symbols when the file is a whole object.
-For a `-g` object it also compares every debug symbol and the line numbers (`DEBUG`, `LINES`).
+## Rebuilding
 
-## Phase 7 (done 2026-11-13): the shipped file
+Prerequisites (none of them is in git):
+- `gamedata/`: the GOG files (table below). `tools/dos.py` uses `$DOSBOX`, else `dosbox` on
+  the PATH, else GOG's `gamedata/DOSBOX/DOSBox.exe`.
+- `tools/*.zip`: the toolchain archives (table below), sha1-checked by `tools/setup.py`.
+- Python 3. capstone is needed by the disassembly tools (`gxx.py`'s first-difference window,
+  `listing.py`, `pseudo.py`); use `../u1-decompiled/build/venv/Scripts/python.exe`. That venv's
+  Python wants Windows paths (`C:/...`), not Git Bash `/c/...` paths, inside `-c` code.
 
-WDOSX 0.97 Final's sources (2005) are archived at github.com/amindlost/wdosx (cloned to
-`build/dl/wdosx`, ignored; downloaded with Karl's OK). They have no `stubit.exe` binary, but
-they do have its source:
-- `src/util/stubit.c` writes the kernel and the COFF loader stub, then calls
-  `src/util/addfile.asm`, which writes the WFSE entry: 4096-byte chunks, each packed by
-- `src/wpack/wpack.c`, WDOSX-Pack 1.07 (Joergen Ibsen; the algorithm is dated 2001, before
-  AK.EXE's 2002 wrapper).
+```sh
+python tools/wdosx.py unpack gamedata/AK.EXE   # build/AK.COF, the reference for every compare
+python tools/setup.py                          # build/tc from tools/*.zip
+python tools/buildalleg.py                     # build/alleg/LIB/DJGPP/LIBALLEG.A (~45 s)
+python tools/libmatch.py --quiet               # optional: all library objects identical
+python tools/build.py                          # compile, link, wrap, compare (~20 s)
+```
 
-`tools/wpack.py` is a line-by-line port of `wpack.c`. It packs all 140 chunks of AK.COF
-exactly as AK.EXE has them, in about 4 seconds. `tools/postlink.py` builds the WFSE entry as
-addfile.asm does and puts it after the kernel and stub, which it copies from
-gamedata/AK.EXE (they are WDOSX's bytes and are never committed). `tools/build.py` runs it
-after the link and reports `AK.EXE IDENTICAL to the shipped file`.
+`tools/build.py` should end with:
 
-Not done:
-- building the WDOSX kernel and stub from WDOSX's assembly sources (it would need TASM);
-- SETUP.EXE, which needs Allegro's setup.c compiled and linked first.
+```
+  whole file: IDENTICAL
+SECTIONS IDENTICAL to the original COFF
+AK.EXE IDENTICAL to the shipped file (238962 bytes, sha1 756637c80622b84b8167f8bc4192e221ac50187d)
+```
+
+This is the gate for every change. For one file at a time:
+`python tools/gxx.py src/akworld.cc` (or `src/ak.cc --flags="-O0 -g"`). It compares every
+function, every symbol, and for ak.cc every debug symbol and line number.
+
+### What the build does
+
+1. Compiles each `src/NAME.cc` in DOSBox (`gcc -O0 -IE:/ -c`, ak.cc `-O0 -g`, binutils 2.8.1).
+2. Links like gcc 2.7.2.1:
+   `ld -o ak crt0.o ak.o akaux.o akchar.o akmenu.o akworld.o -lalleg -liostr -Tdjgpp.djl -lgcc -lc -lgcc`.
+3. Compares `build/link/AK` with `build/AK.COF`: headers, sections, symbol table, whole file.
+4. Wraps it (`tools/postlink.py`):
+   - the bytes of gamedata/AK.EXE before its WFSE entry (WDOSX kernel and `go32stub v2.00T`);
+   - then a WFSE entry `WdosxMain` holding the COFF in 4096-byte chunks, each packed with
+     WDOSX-Pack 1.07 (`tools/wpack.py`).
+   It then compares the result with gamedata/AK.EXE.
 
 ## Repository
 
-| file | what |
+| path | what |
 |---|---|
-| `tools/wdosx.py` | WDOSX reader and unpacker (`info`, `unpack`); the LZ format is in its docstring |
-| `tools/coff.py` | DJGPP COFF reader: `info`, `files`, `funcs`, `syms`, `types`, `demangle` |
-| `tools/akdat.py` | AK.DAT reader: `list`, `extract` (to build/akdat, never committed) |
-| `tools/setup.py` | unpacks the sha1-checked archives into `build/tc` (DJGPP tree, binutils 2.7 in `BNU27`, Allegro, libc sources) |
-| `tools/dos.py` | headless DOSBox runner for DJGPP (C: work, D: DJGPP, E: Allegro), output via `redir`, long lines via `@response` files |
-| `tools/gxx.py` | compile one .cc/.c and compare each function with AK.COF by mangled name (docs/MATCHING.md) |
-| `tools/buildalleg.py` | builds liballeg.a in `build/alleg` as AK.EXE's was built |
-| `tools/libmatch.py` | pairs every library object of AK.COF with an archive member by symbol and compares |
-| `tools/standin.py` | generates `src/standin/*.s`, the assembly stand-ins of the game objects |
-| `tools/build.py` | builds the COFF (C++ where it exists, stand-ins elsewhere), links, compares with AK.COF |
-| `tools/listing.py` | readable disassembly of a game object or function, to write the C++ from |
-| `src/*.cc`, `src/*.h` | the game in C++ (so far akmenu) |
-| `src/standin/*.s` | generated stand-ins for ak.cc, akaux.cc, akchar.cc, akmenu.cc, akworld.cc; each is deleted when its C++ matches |
-| `tools/exediff.py`, `fat12.py` | copied from u1; not used yet |
-| `docs/PLAN.md`, `docs/MAP.md` | the plan; the map of AK.EXE |
-| `docs/MATCHING.md`, `docs/FINDINGS.md` | how gcc 2.7.2.1 -O0 code reads; bugs and mechanics found in the game's code |
+| `src/ak.cc` | the game loops: `rungame` (world map), `rundungeon` (dungeon), `main` (menu, game loop). Compiled `-g`: **its line layout is fixed** (see below) |
+| `src/akworld.cc`, `akworld.h` | the world map, dungeon generator, 3-D view, monster pictures, combat, monster moves; the perspective tables of the constructor |
+| `src/akchar.cc`, `akchar.h` | character creation, the shop, save/load (PLAYER.U0), Lord British, upkeep, death |
+| `src/akmenu.cc`, `akmenu.h` | the main menu |
+| `src/akaux.cc`, `akaux.h`, `ak.h` | intro, instructions, quotes, credits; `ak.h` holds AK.DAT's object indexes |
+| `tools/build.py` | the whole build and every comparison (above) |
+| `tools/gxx.py` | compile one file in DOSBox and compare it function by function, symbols and debug info included |
+| `tools/postlink.py`, `tools/wpack.py` | phase 7: the WFSE entry, as WDOSX 0.97's `addfile.asm` writes it; WDOSX-Pack 1.07 ported from `wpack.c` |
+| `tools/wdosx.py` | WDOSX reader and unpacker (`info`, `unpack`); the WFSE and LZ formats are in its docstring |
+| `tools/coff.py` | DJGPP COFF reader: `info`, `files`, `funcs`, `syms`, `types`, gcc 2.x demangler |
+| `tools/listing.py` | annotated disassembly of a game object or function: labels, strings, doubles, switch tables, source lines (ak.cc) |
+| `tools/pseudo.py` | the -O0 code folded into C-like pseudo code (registers, spill slots and x87 stack become expressions; members and array indexes named). `PSEUDO_TEMPS=94,90` forces frame slots to be temporaries |
+| `tools/setup.py`, `tools/dos.py` | the toolchain in `build/tc`; the headless DOSBox runner (long lines via `@response` files) |
+| `tools/buildalleg.py`, `tools/libmatch.py` | Allegro 2.2's build; library objects paired by symbol and compared |
+| `tools/akdat.py` | AK.DAT reader (`list`, `extract` to `build/akdat`) |
+| `tools/standin.py` | phase 3's generator of assembly stand-ins; `build.py` still falls back to `src/standin/NAME.s` when a `src/NAME.cc` is missing |
+| `tools/exediff.py`, `fat12.py` | copied from u1, unused |
+| `docs/` | PLAN, MAP, MATCHING, FINDINGS, this file |
 
-Git: `master`, local only, author set in the repository's config as in u1. `tools/u1/`
-(Lattice-era tools from u1) and the Lattice/MS C archives in `tools/` are ignored by git.
+Git: branch `master`, pushed to github.com/KarlClinckspoor/u0-decompiled (each push so far was
+on Karl's word). Ignored: `gamedata/`, `build/`, the archives in `tools/`, `tools/u1/`.
+
+## Changing the source without breaking the match
+
+Phase 5 means editing matched code, so these rules matter. Each one was learned the hard way;
+docs/MATCHING.md has the details and evidence.
+- **Build after every change** (`tools/build.py`, or `tools/gxx.py` for one file). Only the
+  compiler decides.
+- **ak.cc's line numbers are in the binary.** A statement may not move to another line. Comments
+  and blank lines can change only where they don't shift a statement: edit within a line, or
+  swap a comment line for a blank line. Its types (the headers' classes) are in the debug
+  information too, member names and array dimensions included.
+- **Label numbers are in the symbol table**, numbered across each file, headers included.
+  Adding or removing a `goto` label, a `case`, an `if`, a loop or an inline-function call
+  changes them. Changing the include order changes them. Unused labels (`done:` in
+  `drawdungeon`, `stay:` in `movemonsters`) must stay.
+- **Function order matters beyond each function.** Dead jumps before an epilogue depend on a gcc
+  global that earlier functions set (MATCHING.md, "Dead jumps").
+- **Names are mostly free, code shape is not.**
+  - Free: the names of locals, parameters and user labels in the four files without `-g`
+    (gcc numbers its labels `Ln` whatever the source calls them).
+  - Not free:
+    - anything ak.cc's debug information records: its locals' names, and the classes in
+      `akaux.h`, `akchar.h`, `akmenu.h` and `akworld.h`, member names and order included;
+    - method and class names, which are in the mangled symbols;
+    - declaration order, which gives the frame slots (unused locals keep theirs).
+  - In the code itself: operand order (`a == b` vs `b == a`), how sums are grouped
+    (`a - (b + 3)`), casts (`(int)floor(...)`), `&`/`|` instead of `&&`/`||`, and empty
+    statements (`if (...) ; else`).
+- **Named constants**: `#define` is free as long as value and type stay the same. A new
+  `enum` or type in a header that ak.cc includes would add debug symbols and break the match.
+  Put such types in a separate header that ak.cc does not include.
+
+## Open work
+
+1. **Phase 5, readable pass.**
+   - akworld.cc has no debug info, so its locals' and parameters' names are guesses (mostly the
+     Apple BASIC's: `x`, `w`, `cent`, `l1`, `mn`, `dam`...).
+   - Map values (world: 1 mountains, 2 tree, 3 town, 4 dungeon, 5 castle; dungeon: 1 wall,
+     2 trap, 3 hidden door, 4 door, 5 chest, 7/9 ladder down, 8 ladder up, monster * 10), the
+     key codes and the colours could become named constants.
+   - Every function has a comment; some say "probably". The Apple II Applesoft listing would
+     confirm the names and the meaning of variables (Corey Roth ported it closely).
+2. **Phase 6, mechanics.**
+   - Write docs/game/ from docs/FINDINGS.md (world and dungeon generation, combat, the amulet,
+     quests, food, the save file, AK.DAT texts).
+   - Check the findings in play: GOG's DOSBox with AK.EXE. Mark each "checked in play" or
+     "read only". The bugs (towns never thinned, uninitialised `itoa` buffers, the mistyped
+     range check, mages buying rapiers and bows) are good first checks.
+   - Compare with the Apple II original where it differs (random numbers, the generators,
+     rounding).
+3. Optional: build the WDOSX kernel and stub from WDOSX's sources (`kernel/wdosx.asm`,
+   `coff/stubcf.asm`; needs TASM) instead of copying them. They carry the 1996-2002 copyright,
+   and the archived sources are the 2005 final, so they may differ.
+4. Optional, phase 8: a port against a modern Allegro or SDL shim.
+
+## Facts worth knowing
+
+- The COFF is not stripped: 268 objects in link order, every name, every local label, and ak.cc's
+  `-g` information (class layouts, locals). The game has no `.data` or `.bss` of its own;
+  literals are in `.text` before each function.
+- Member names are Garriott's Applesoft variables (TX, TY, PX, PY, DX, DY, INOUT, TASK, LK,
+  PER, CD, LAD, LD, FT, XX, YY, MZ, ML).
+- `akworld` inherits `charsave`, and its own `sav` is never used except by `viewintro`, which
+  nothing calls. The player's record is always passed in as a `savestruct &`.
+- AK.DAT: an Allegro 2.2 packfile (`slh!` LZSS) around a datafile of 7 objects: instructions,
+  three Lord British speeches, two fonts, the grabber's info. Built in `c:\djgpp\bin`,
+  13-20 November 1997.
+- The WDOSX format, read from WDOSX 0.97's sources: WFSE flags 0x26 = stub class 6 (DJGPP COFF)
+  | 0x20 (WDOSX-Pack); the name field is `WdosxMain\0`, word 6, and the last chunk's packed size;
+  a chunk that does not shrink is stored raw.
+
+## Conventions
+
+- Never commit gamedata, the toolchain archives, `build/`, the extracted AK.DAT contents or
+  WDOSX's bytes.
+- Downloads and pushes only with Karl's OK.
+- Never kill DOSBox processes wholesale: other sessions may run their own.
+- Commit early: a session that ended mid-write once left `tools/coff.py` as all zero bytes.
+- Keep the user's email out of anything sent outside.
+
+## Reference
 
 ### gamedata (GOG)
 
@@ -154,78 +196,26 @@ Git: `master`, local only, author set in the repository's config as in u1. `tool
 | README.NOW | 2488 | 015d114b405b6b57c4b28dcd212fada18825cfce |
 | WHATS.NEW | 2320 | 355a8616d1b7eb25e907c8d17aacd87eab4aa9d9 |
 
-### Toolchain archives (downloaded 2026-11-13, in `tools/`, ignored by git)
+`build/AK.COF` (unpacked by `tools/wdosx.py`): 570462 bytes, sha1
+3badf300cef0032f57b12468b51b448c3926bcab.
+
+### Toolchain archives (in `tools/`, ignored by git)
 
 | archive | bytes | sha1 | from | what |
 |---|---|---|---|---|
 | djdev201.zip | 1538295 | ef2129363cdc031c1163543b9dbdf4e763750173 | delorie.com/pub/djgpp/deleted/v2/ | DJGPP 2.01: crt0.o, libc.a, libm.a, headers, stubify |
 | djlsr201.zip | 1472671 | 9dd9de039f632093f03ba6ca53059dd3388209b5 | delorie.com/pub/djgpp/deleted/v2/ | DJGPP 2.01 libc sources (reference) |
-| bnu27b.zip | 1712024 | 89696fbc9766b32ab5d554a1df591f7093dbbcb0 | delorie.com/pub/djgpp/deleted/v2gnu/ | binutils 2.7 (as, ld, ar, objdump) |
+| bnu27b.zip | 1712024 | 89696fbc9766b32ab5d554a1df591f7093dbbcb0 | delorie.com/pub/djgpp/deleted/v2gnu/ | binutils 2.7 (Allegro's assembler) |
+| bnu281b.zip | 1896445 | 7230cb4ab1e3a8a11312fce8c7634e265059cc53 | archive.org item `czchip200001cd` (Czech *Chip* 2000-01 CD), `ZKUSTE/FREESOFT/BIN/BNU281B/BNU281B.ZIP`, read from the CD image with HTTP range requests | binutils 2.8.1 (the game's assembler) |
 | mak375b.zip | 209185 | 2ba09b8fdbb0af7fe955c4966c6083ad8ff512a0 | delorie.com/pub/djgpp/deleted/v2gnu/ | GNU make 3.75 |
-| csdpmi3b.zip | 40719 | 9e8a4487ef1e2e154552e9f4afd4306f8958910d | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r3 (1996) |
-| csdpmi4b.zip | 41506 | 4f56ee401bafa6e8881e96dbd85794a1b08dc690 | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r4 (Oct 1997) |
+| csdpmi3b.zip | 40719 | 9e8a4487ef1e2e154552e9f4afd4306f8958910d | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r3 |
+| csdpmi4b.zip | 41506 | 4f56ee401bafa6e8881e96dbd85794a1b08dc690 | delorie.com/pub/djgpp/deleted/v2misc/ | CWSDPMI r4 |
 | gcc2721b.zip | 1096967 | a52d1dfce480ad64b30cc24a6febc475d3cad792 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | gcc 2.7.2.1 (cc1, libgcc.a) |
 | gpp2721b.zip | 681045 | 6e2b72e9b60fb54aa79177b97c39f490e1cc474f | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | cc1plus 2.7.2.1 |
-| lgp271b.zip | 638706 | c13396c901ca3c2ebd8f01a6f751723146fc0296 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | libg++ 2.7.1 (libgpp.a, libiostr.a, libstdcx.a) |
+| lgp271b.zip | 638706 | c13396c901ca3c2ebd8f01a6f751723146fc0296 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | libg++ 2.7.1 (libiostr.a) |
 | alleg22.zip | 1007783 | 56f8c1362a3f2920b584201cc159faa0f80e0162 | liballeg.org/files/ | Allegro 2.2 source (1997-03-01) |
-| gcc2721s.zip | 4574996 | 77086f804981a16a429ac29209200a35cc155521 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | gcc 2.7.2.1 source: read to explain codegen (cp/decl.c, stmt.c, cp/parse.y); not needed to build |
-| bnu281b.zip | 1896445 | 7230cb4ab1e3a8a11312fce8c7634e265059cc53 | archive.org item `czchip200001cd` (Czech *Chip* 2000-01 CD), file `ZKUSTE/FREESOFT/BIN/BNU281B/BNU281B.ZIP`, read from the CD image with HTTP range requests | binutils 2.8.1 (files dated 1997-07 to 1998-01): the game's assembler |
+| gcc2721s.zip | 4574996 | 77086f804981a16a429ac29209200a35cc155521 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | gcc 2.7.2.1 source: read to explain codegen (`build/gccsrc/` has the files used); not needed to build |
 
-gcc 2.7.2.1 is no longer in the DJGPP archive. Its `deleted/v2gnu/gcc2721.txt` points to Martin
-Strömberg's site, which still has it.
-
-What was checked:
-- Every zip passes its integrity test.
-- libc.a's ident is exactly AK.EXE's: `$Id: DJGPP libc built Oct 31 1996 19:13:19 by gcc 2.7.2.1 $`.
-- cc1plus says 2.7.2.1. allegro.h says 2.2.
-- A quick name-based pairing of archive members with AK.COF's objects (`.text` compared, with
-  relocated words masked) found them **byte-identical**: 159 libc.a objects, all 5 libgcc.a
-  objects, 21 libiostr.a objects (so the game was linked with `-liostr`, as Allegro's setup is)
-  and crt0.o.
-- Not yet paired: the libc `*.stub` objects and the `fake` (assembly) math objects, which need
-  pairing by symbol rather than by file name.
-- Allegro 2.2's makefile builds with `-m486 -O3 -ffast-math -fomit-frame-pointer`, and those
-  are the flags AK.EXE's Allegro was built with (phase 2). My earlier doubt came from looking
-  at absolute addresses; alignment is relative to each object.
-
-## Phase 2 (done 2026-11-13): the toolchain runs and matches
-
-docs/MATCHING.md has the details. In short:
-- `tools/setup.py` unpacks the archives (sha1-checked) into `build/tc`. `tools/dos.py` runs
-  DJGPP in headless DOSBox, with output captured through `redir` and long command lines passed
-  as `@response` files. hello.cc compiles, links with `-liostr` and runs (about 4.5 s).
-- **Allegro 2.2 rebuilds identical** (text.c, math.c, gfx.c: code and data, relocated words
-  masked) with gcc 2.7.2.1, the makefile's flags and **binutils 2.7**.
-- **The game is `-O0`, assembled with binutils 2.8.1.** `tools/gxx.py` compiles a .cc and
-  compares each function with AK.COF. First probes all match: `akmenu::akmenu()`,
-  `akmenu::~akmenu()` and `akworld::sgn(int)` (written as `return n = 1;` etc.).
-- Binutils 2.8.1 was not in DJGPP's archive any more. A copy came from a 2000 magazine CD on
-  archive.org (table above).
-- Rebuilding libc from djlsr201 with libc's flags gives libc's code, apart from alignment
-  fillers (libc was assembled with 2.7). That doesn't matter: libc links from the archive.
-
-## Conventions
-
-- On Windows, run the tools with plain `python` (no capstone needed) or with
-  `../u1-decompiled/build/venv/Scripts/python.exe` when capstone is wanted. That venv's Python
-  wants Windows paths (`C:/...`), not Git Bash `/c/...` paths, inside `-c` code.
-- Commit early: a session that ended mid-write once left `tools/coff.py` as all zero bytes.
-- Never commit gamedata, the toolchain archives, `build/` (the unpacked program, the extracted
-  datafile texts and fonts are the game's), or bytes of the wrapper.
-
-## Next steps
-
-To rebuild everything from the archives:
-
-```sh
-python tools/setup.py            # build/tc from tools/*.zip (sha1-checked)
-python tools/buildalleg.py       # build/alleg/LIB/DJGPP/LIBALLEG.A
-python tools/libmatch.py --quiet # all library objects identical
-python tools/build.py            # AK.COF and AK.EXE identical to the originals
-```
-
-1. **Phase 5, readable pass**: the names of akworld.cc's locals and parameters are guesses (it
-   has no `-g`); magic numbers (map values, colours, key codes) could become named constants
-   where the rebuild allows. Every change is checked by `tools/build.py`.
-2. **Phase 6, mechanics**: docs/game/ from docs/FINDINGS.md, and check the findings in play
-   (DOSBox with the GOG game).
+WDOSX 0.97 Final's sources: github.com/amindlost/wdosx, cloned to `build/dl/wdosx` (ignored).
+Only read, for `src/wpack/wpack.c`, `src/util/stubit.c` and `src/util/addfile.asm`; the build
+does not need them.
