@@ -136,6 +136,30 @@ class Coff:
                 addr, ln = struct.unpack_from('<IH', self.data, sec['lnnoptr'] + 6 * k)
                 self.lines.append((sec['name'], addr, ln))
 
+    def section(self, name):
+        for sec in self.sections:
+            if sec['name'] == name:
+                return sec
+        return None
+
+    def raw(self, name):
+        """Raw bytes of a section (empty for .bss or a missing section)."""
+        sec = self.section(name)
+        if sec is None or not sec['scnptr']:
+            return b''
+        return self.data[sec['scnptr']:sec['scnptr'] + sec['size']]
+
+    def relocs(self, name):
+        """Relocations of a section in an object: (offset in the section, symbol index, type).
+        Types: 6 = RELLONG (absolute 32-bit), 20 = PCRLONG (pc-relative 32-bit)."""
+        sec = self.section(name)
+        out = []
+        if sec:
+            for k in range(sec['nreloc']):
+                va, sym, typ = struct.unpack_from('<IIH', self.data, sec['relptr'] + 10 * k)
+                out.append((va - sec['vaddr'], sym, typ))
+        return out
+
     def obj(self, name):
         for o in self.files:
             if o.name == name:
@@ -227,6 +251,40 @@ class Coff:
                 out.append((SCLASS[s.sclass], s.name.lstrip('_'), size, members))
             k += 1
         return out
+
+
+def ar_members(data):
+    """Members of a Unix ar archive (DJGPP's libc.a ...) as (name, bytes), in archive order."""
+    if data[:8] != b'!<arch>\n':
+        raise ValueError('not an ar archive')
+    p = 8
+    names = b''
+    while p + 60 <= len(data):
+        h = data[p:p + 60]
+        name = h[:16].decode('latin-1').strip()
+        size = int(h[48:58])
+        body = data[p + 60:p + 60 + size]
+        if name == '//':
+            names = body
+        elif name not in ('/', '__.SYMDEF', '__.SYMDEF/', 'ARFILENAMES/'):
+            if name.startswith('/') and name[1:].isdigit():
+                o = int(name[1:])
+                e = min(i for i in (names.find(b'/', o), names.find(b'\n', o), len(names)) if i >= 0)
+                name = names[o:e].decode('latin-1')
+            yield name.rstrip('/'), body
+        p += 60 + size + (size & 1)
+
+
+def masked(raw, relocs):
+    """Bytes with every relocated 32-bit field set to zero, plus the set of masked offsets."""
+    b = bytearray(raw)
+    mask = set()
+    for off, _sym, _typ in relocs:
+        for i in range(off, off + 4):
+            if 0 <= i < len(b):
+                b[i] = 0
+                mask.add(i)
+    return bytes(b), mask
 
 
 # ---------------------------------------------------------------- gcc 2.x demangler

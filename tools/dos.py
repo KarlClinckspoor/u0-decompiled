@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
-"""Run DOS commands headless in DOSBox: C: is a work directory, D: is build/tc (the toolchain).
+"""Run DJGPP commands headless in DOSBox.
 
-    python3 tools/dos.py WORKDIR "CMD" ["CMD" ...]
+    python tools/dos.py WORKDIR "CMD" ["CMD" ...]
 
-As a module: run(workdir, [cmds]) -> None. PATH holds the Lattice compiler, INCLUDE its headers.
-Each call uses its own config file, so several runs can go at once.
+Drives: C: = WORKDIR, D: = build/tc/DJGPP (gcc 2.7.2.1, binutils 2.7, libc, CWSDPMI),
+E: = build/tc/ALLEGRO. DJGPP=D:\\DJGPP.ENV, PATH=D:\\BIN. Build the tree with tools/setup.py.
+Pass source names in lower case (gcc picks the language from the name as given: `foo.cc` is
+C++, `FOO.CC` is taken for a linker input).
+
+As a module: run(workdir, cmds, log=True) -> str. Each command runs through DJGPP's `redir`, so
+its stdout and stderr go to C:\\_LOG.TXT. The text is returned and the file removed. Each run
+writes its own config and batch file, so several runs can go at once in different work
+directories. Never kill DOSBox processes wholesale: other sessions run their own.
 """
-import os, shutil, subprocess, sys, tempfile
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -19,7 +30,7 @@ DOSBOX = (os.environ.get('DOSBOX') or shutil.which('dosbox') or
 CONF = """[sdl]
 fullscreen=false
 [dosbox]
-memsize=16
+memsize=64
 machine=svga_s3
 [cpu]
 core=dynamic
@@ -31,24 +42,58 @@ tandy=off
 nosound=true
 [midi]
 mpu401=none
+[dos]
+xms=true
+ems=false
+umb=true
 [autoexec]
 mount c "{c}"
 mount d "{d}"
-set PATH=D:\\LC;Z:\\
-set INCLUDE=D:\\INC\\
+mount e "{e}"
+set DJGPP=D:\\DJGPP.ENV
+set PATH=D:\\BIN;Z:\\
 c:
 """
 
+LOG = '_LOG.TXT'
 
-def run(workdir, cmds, timeout=300):
+
+def run(workdir, cmds, log=True, timeout=600):
+    """Run cmds in DOSBox with C: = workdir; returns the combined output when log is set."""
     workdir = os.path.abspath(workdir)
+    os.makedirs(workdir, exist_ok=True)
+    logpath = os.path.join(workdir, LOG)
+    if os.path.exists(logpath):
+        os.unlink(logpath)
+    lines = []
+    rsp = []
+    for k, c in enumerate(cmds):
+        # DOS cuts command lines at 127 characters; DJGPP programs read @response files, so the
+        # arguments of a long command go into one (C:\_RSPn.TXT, removed afterwards)
+        if len(c) > 100 and ' ' in c:
+            prog, args = c.split(' ', 1)
+            name = '_RSP%d.TXT' % k
+            with open(os.path.join(workdir, name), 'w', newline='') as f:
+                f.write(args.replace(' ', '\r\n') + '\r\n')
+            rsp.append(name)
+            shown = c
+            c = '%s @%s' % (prog, name)
+        else:
+            shown = c
+        if log:
+            # DOSBox's shell has no ^ escape: keep redirection characters out of the echo
+            shown = shown.replace('>', '}').replace('<', '{').replace('|', '!')[:110]
+            lines.append('ECHO ## %s >> %s' % (shown, LOG))
+            lines.append('REDIR -oa %s -eo %s' % (LOG, c))
+        else:
+            lines.append(c)
     # the commands go in a batch file: DOSBox 0.74's [autoexec] overflows at about 4 KB
     bat = os.path.join(workdir, '_RUN.BAT')
     with open(bat, 'w', newline='') as f:
-        f.write('@ECHO OFF\r\n' + ''.join(c + '\r\n' for c in cmds))
+        f.write('@ECHO OFF\r\n' + ''.join(l + '\r\n' for l in lines))
     fd, conf = tempfile.mkstemp(suffix='.conf')
     with os.fdopen(fd, 'w') as f:
-        f.write(CONF.format(c=workdir, d=TC))
+        f.write(CONF.format(c=workdir, d=os.path.join(TC, 'DJGPP'), e=os.path.join(TC, 'ALLEGRO')))
         f.write('CALL _RUN.BAT\nexit\n')
     env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy')
     try:
@@ -58,9 +103,15 @@ def run(workdir, cmds, timeout=300):
                        cwd=os.path.dirname(conf))   # -noconsole writes stdout.txt/stderr.txt there
     finally:
         os.unlink(conf)
-        if os.path.exists(bat):
-            os.unlink(bat)
+        for name in ['_RUN.BAT'] + rsp:
+            if os.path.exists(os.path.join(workdir, name)):
+                os.unlink(os.path.join(workdir, name))
+    out = ''
+    if log and os.path.exists(logpath):
+        out = open(logpath, 'rb').read().decode('latin-1').replace('\r\n', '\n')
+        os.unlink(logpath)
+    return out
 
 
 if __name__ == '__main__':
-    run(sys.argv[1], sys.argv[2:])
+    print(run(sys.argv[1], sys.argv[2:]), end='')

@@ -9,7 +9,7 @@ sister projects `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` ar
 
 | file | what | status |
 |---|---|---|
-| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | **unpacked and mapped** (phase 1): `build/AK.COF` and docs/MAP.md. No source yet |
+| AK.EXE | the game: a DJGPP 2.01 / gcc 2.7.2.1 C++ program with Allegro 2.2, inside a WDOSX 0.97 wrapper | unpacked and mapped (phase 1); **toolchain proven** (phase 2): Allegro objects rebuild identical, first game functions match. No source tree yet |
 | AK.DAT | Allegro datafile: instruction text, Lord British's speeches, two fonts | read by `tools/akdat.py` |
 | SETUP.EXE | Allegro 2.2's stock sound setup, same wrapper (stripped) | unpacked, not looked at further |
 
@@ -28,6 +28,8 @@ python tools/akdat.py list                        # AK.DAT's objects
 ```
 
 None of them needs anything beyond Python 3. capstone (`../u1-decompiled/build/venv`) is useful
-for disassembly. `tools/dos.py`, `setup.py`, `exediff.py` and `fat12.py` are copied from u1 and
-are to be adapted for the DJGPP toolchain (phase 2). `tools/u1/` (ignored by git) holds the rest
-of u1's Lattice-era tools that were in this folder.
+for disassembly. To compile, put the toolchain archives in `tools/` (docs/HANDOFF.md lists them)
+and run `python tools/setup.py`. `tools/dos.py` then runs gcc 2.7.2.1 in headless DOSBox, and
+`python tools/gxx.py FILE.cc` compiles one file and compares its functions with the original
+(docs/MATCHING.md). `tools/u1/` (ignored by git) holds the rest of u1's Lattice-era tools that
+were in this folder.

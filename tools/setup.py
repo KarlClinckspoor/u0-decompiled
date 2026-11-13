@@ -1,123 +1,88 @@
 #!/usr/bin/env python3
 """Unpack the toolchain from the archives in tools/ into build/tc/.
 
-    python3 tools/setup.py [--archives DIR]
+    python tools/setup.py [--archives DIR] [--clean]
 
-Needs `7z` (p7zip) on the PATH; the floppy images inside are read with tools/fat12.py.
-The archives are the user's own copies (never committed):
+The archives are not committed (docs/HANDOFF.md lists each with its source and sha1):
 
-  Lattice iAPX32 C compiler v3.10.zip     LC.EXE 3.10, LC1 3.11, LC2 3.10  -> build/tc/LC
-  Lattice C 3.00g (5.25).7z               headers, CS.OBJ, LCS.LIB, C.ASM  -> build/tc/INC, LIB300, SRC300
-  Lattice C 3.30 ... (Installed).7z       C.ASM and library sources (reference only) -> build/tc/SRC330
-  Microsoft C Compiler 2.03 ....7z        LINK 2.40                        -> build/tc/LINK240
-  MASM 3.0 image (u6-decompiled)          MASM 3.00, LINK 3.00, LIB        -> build/tc/MASM3
-  Microsoft Macro Assembler 4.0 ....7z    MASM 4.00, LINK 3.05, LIB        -> build/tc/MASM4
+  djdev201.zip  DJGPP 2.01 (crt0, libc, headers, stubify, djgpp.env)   -> build/tc/DJGPP
+  bnu27b.zip    binutils 2.7                                           -> build/tc/DJGPP
+  bnu281b.zip   binutils 2.8.1, unpacked over 2.7                      -> build/tc/DJGPP
+  mak375b.zip   make 3.75                                              -> build/tc/DJGPP
+  gcc2721b.zip  gcc 2.7.2.1                                            -> build/tc/DJGPP
+  gpp2721b.zip  cc1plus 2.7.2.1                                        -> build/tc/DJGPP
+  lgp271b.zip   libg++ 2.7.1                                           -> build/tc/DJGPP
+  csdpmi4b.zip  CWSDPMI r4 (BIN/CWSDPMI.EXE)                           -> build/tc/DJGPP
+  alleg22.zip   Allegro 2.2 source                                     -> build/tc/ALLEGRO
+  djlsr201.zip  DJGPP 2.01 libc sources (reference)                    -> build/tc/DJLSR
+
+All are plain zips with 8.3 names, so Python's zipfile is enough (no 7-Zip).
+The sha1 of each archive is checked first.
 """
-import argparse, glob, os, shutil, subprocess, sys, tempfile, zipfile
+import argparse
+import hashlib
+import os
+import shutil
+import sys
+import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 TC = os.path.join(ROOT, 'build', 'tc')
-sys.path.insert(0, HERE)
+
+ARCHIVES = [  # (file, sha1, target directory under build/tc)
+    ('djdev201.zip', 'ef2129363cdc031c1163543b9dbdf4e763750173', 'DJGPP'),
+    ('bnu27b.zip', '89696fbc9766b32ab5d554a1df591f7093dbbcb0', 'DJGPP'),
+    # binutils 2.8.1 replaces 2.7's as/ld: the game's alignment fillers (89 f6, 8d 76 00) and
+    # its kept L labels are 2.8's, not 2.7's (docs/HANDOFF.md)
+    ('bnu281b.zip', '7230cb4ab1e3a8a11312fce8c7634e265059cc53', 'DJGPP'),
+    # binutils 2.7 again, on its own, for liballeg.a: Allegro in AK.EXE has 2.7's fillers.
+    # Select it with gcc -BD:/BNU27/BIN/
+    ('bnu27b.zip', '89696fbc9766b32ab5d554a1df591f7093dbbcb0', 'DJGPP/BNU27'),
+    ('mak375b.zip', '2ba09b8fdbb0af7fe955c4966c6083ad8ff512a0', 'DJGPP'),
+    ('gcc2721b.zip', 'a52d1dfce480ad64b30cc24a6febc475d3cad792', 'DJGPP'),
+    ('gpp2721b.zip', '6e2b72e9b60fb54aa79177b97c39f490e1cc474f', 'DJGPP'),
+    ('lgp271b.zip', 'c13396c901ca3c2ebd8f01a6f751723146fc0296', 'DJGPP'),
+    ('csdpmi4b.zip', '4f56ee401bafa6e8881e96dbd85794a1b08dc690', 'DJGPP'),
+    ('alleg22.zip', '56f8c1362a3f2920b584201cc159faa0f80e0162', 'ALLEGRO'),
+    ('djlsr201.zip', '9dd9de039f632093f03ba6ca53059dd3388209b5', 'DJLSR'),
+]
 
 
-SEVENZ = shutil.which('7z') or next((p for p in (r'C:\Program Files\7-Zip\7z.exe',
-                                                  r'C:\Program Files (x86)\7-Zip\7z.exe')
-                                     if os.path.exists(p)), '7z')
-
-
-def sh7z(archive, out):
-    subprocess.run([SEVENZ, 'x', '-y', '-o' + out, archive], check=True, stdout=subprocess.DEVNULL)
-
-
-def fat(img, out):
-    subprocess.run([sys.executable, '-I', os.path.join(HERE, 'fat12.py'), img, out], check=True,
-                   stdout=subprocess.DEVNULL)
-
-
-def find(arch, pat):
-    m = glob.glob(os.path.join(arch, pat))
-    if not m:
-        raise SystemExit('missing archive: ' + pat)
-    return m[0]
-
-
-def copy(srcdir, names, dst):
-    os.makedirs(dst, exist_ok=True)
-    have = {n.upper(): n for n in os.listdir(srcdir)}
-    for n in names:
-        shutil.copy(os.path.join(srcdir, have[n.upper()]), os.path.join(dst, n.upper()))
+def unzip(path, dest):
+    """Extract with upper-case 8.3 names (as DOS sees them), refusing paths that leave dest."""
+    root = os.path.abspath(dest)
+    with zipfile.ZipFile(path) as z:
+        for info in z.infolist():
+            name = info.filename.replace('\\', '/').upper()
+            target = os.path.abspath(os.path.join(root, *name.rstrip('/').split('/')))
+            if not target.startswith(root + os.sep):
+                raise SystemExit('%s: refusing %s' % (path, info.filename))
+            if info.is_dir():
+                os.makedirs(target, exist_ok=True)
+                continue
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with z.open(info) as src, open(target, 'wb') as dst:
+                shutil.copyfileobj(src, dst)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--archives', default=os.path.join(ROOT, 'tools'))
-    ap.add_argument('--masm3', help='MASM 3.0 floppy image (default: search ../u6-decompiled/tools/masm300)')
+    ap.add_argument('--archives', default=HERE)
+    ap.add_argument('--clean', action='store_true', help='remove build/tc first')
     a = ap.parse_args()
-    arch = a.archives
-    tmp = tempfile.mkdtemp()
-    os.makedirs(TC, exist_ok=True)
-
-    # Lattice 3.10 compiler
-    with zipfile.ZipFile(find(arch, 'Lattice iAPX32 C compiler v3.10.zip')) as z:
-        z.extractall(os.path.join(tmp, 'l310'))
-    d = os.path.join(tmp, 'l310')
-    copy(os.path.join(d, 'L'), ['LC.EXE', 'LC1.EXE'], os.path.join(TC, 'LC'))
-    copy(d, ['LC2.EXE'], os.path.join(TC, 'LC'))
-
-    # Lattice 3.00g: headers, libraries, sources
-    sh7z(find(arch, 'Lattice C 3.00g*.7z'), os.path.join(tmp, 'l300'))
-    for i in sorted(glob.glob(os.path.join(tmp, 'l300', '*', 'disk0*.img'))):
-        fat(i, os.path.join(tmp, 'l300x', os.path.basename(i)[:-4]))
-    x = os.path.join(tmp, 'l300x')
-    inc = os.path.join(TC, 'INC')
-    os.makedirs(inc, exist_ok=True)
-    for f in glob.glob(os.path.join(x, 'disk01', '*.H')):
-        shutil.copy(f, inc)
-    for f in glob.glob(os.path.join(d, '*.H')):          # 3.10's STDIO.H/STDLIB.H win
-        shutil.copy(f, inc)
-    copy(os.path.join(x, 'disk01'), ['OMD.EXE'], os.path.join(TC, 'LC'))
-    copy(os.path.join(x, 'disk03'), ['CS.OBJ', 'LCS.LIB', 'SM8086.MAC'], os.path.join(TC, 'LIB300'))
-    src = os.path.join(TC, 'SRC300')
-    os.makedirs(src, exist_ok=True)
-    for f in glob.glob(os.path.join(x, 'disk02', '*.*')):
-        if not f.upper().endswith('.EXE'):
-            shutil.copy(f, src)
-    shutil.copy(os.path.join(x, 'disk01', '8087.MAC'), src)
-
-    # Lattice 3.30: reference sources
-    sh7z(find(arch, 'Lattice C 3.30*.7z'), os.path.join(tmp, 'l330'))
-    z = glob.glob(os.path.join(tmp, 'l330', '*', '*.zip'))[0]
-    with zipfile.ZipFile(z) as zz:
-        zz.extractall(os.path.join(tmp, 'l330x'))
-    shutil.copytree(os.path.join(tmp, 'l330x', 'SOURCE'), os.path.join(TC, 'SRC330'), dirs_exist_ok=True)
-    shutil.copy(os.path.join(tmp, 'l330x', 'S', 'DOS.MAC'), os.path.join(TC, 'SRC330'))
-
-    # LINK 2.40 from MS C 2.03
-    sh7z(find(arch, 'Microsoft C Compiler 2.03*.7z'), os.path.join(tmp, 'msc203'))
-    i = glob.glob(os.path.join(tmp, 'msc203', '*', 'disk03.img'))[0]
-    fat(i, os.path.join(tmp, 'msc203x'))
-    copy(os.path.join(tmp, 'msc203x'), ['LINK.EXE'], os.path.join(TC, 'LINK240'))
-
-    # MASM 3.0 (LINK 3.00, LIB)
-    m3 = a.masm3 or (glob.glob(os.path.join(ROOT, '..', 'u6-decompiled', 'tools', 'masm300', '*.img')) or
-                     glob.glob(os.path.join(arch, 'masm300', '*.img')) or [None])[0]
-    if m3:
-        fat(m3, os.path.join(tmp, 'm3'))
-        copy(os.path.join(tmp, 'm3'), ['MASM.EXE', 'LINK.EXE', 'LIB.EXE'], os.path.join(TC, 'MASM3'))
-    else:
-        print('warning: MASM 3.0 image not found (--masm3)')
-
-    # MASM 4.0 (LINK 3.05, LIB, EXEMOD)
-    sh7z(find(arch, 'Microsoft Macro Assembler 4.0*.7z'), os.path.join(tmp, 'm4'))
-    i = glob.glob(os.path.join(tmp, 'm4', '*', '*.img'))[0]
-    fat(i, os.path.join(tmp, 'm4x'))
-    copy(os.path.join(tmp, 'm4x'), ['MASM.EXE', 'LINK.EXE', 'LIB.EXE', 'EXEMOD.EXE'], os.path.join(TC, 'MASM4'))
-
-    shutil.rmtree(tmp)
-    for r, ds, fs in sorted(os.walk(TC)):
-        print(os.path.relpath(r, TC), len(fs), 'files')
+    if a.clean and os.path.isdir(TC):
+        shutil.rmtree(TC)
+    for name, sha1, sub in ARCHIVES:
+        path = os.path.join(a.archives, name)
+        if not os.path.exists(path):
+            raise SystemExit('missing archive: %s (docs/HANDOFF.md says where it comes from)' % path)
+        got = hashlib.sha1(open(path, 'rb').read()).hexdigest()
+        if got != sha1:
+            raise SystemExit('%s: sha1 %s, expected %s' % (name, got, sha1))
+        unzip(path, os.path.join(TC, sub))
+        print('%-13s -> build/tc/%s' % (name, sub))
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

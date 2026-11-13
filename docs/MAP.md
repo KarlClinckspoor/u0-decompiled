@@ -163,11 +163,15 @@ The debug information shows references as pointers (C++ `&` has no COFF type).
 
 ## Code fingerprints (for choosing compiler flags)
 
-- **Game**: frame pointer (`push ebp; mov ebp,esp; sub esp,N; push edi; push esi; push ebx`),
-  register variables (ebx, esi, edi): optimized (`-O` or `-O2`), with `-g` for ak.cc. Functions
-  are aligned to 4 with gas's fillers (`90`, `89 f6`, `8d 76 00`), so no `-m486`. Constructors
-  end with gcc 2.7's `jmp` to the next instruction (`eb 00`) before `leave; ret`.
-- **Allegro**: `-fomit-frame-pointer` (arguments at `[esp+N]`), functions also aligned to 4.
+Settled in phase 2; docs/MATCHING.md has the proof.
+
+- **Game**: `-O0` (unoptimized), `-g` for ak.cc, no `-m486`, assembled with binutils 2.8.1. Signs:
+  a frame pointer, every `return` jumping to a shared epilogue (even with a zero displacement,
+  `eb 00`), `mov eax,eax` after calls, locals reloaded from memory. Functions are aligned to 4
+  relative to their object, with 2.8.1's fillers (`90`, `89 f6`, `8d 76 00`). (A first reading
+  here said "optimized"; the probes in phase 2 showed `-O0`.)
+- **Allegro**: its makefile's `-m486 -O3 -ffast-math -fomit-frame-pointer` (arguments at
+  `[esp+N]`, functions 16-aligned within each object), assembled with binutils 2.7.
 - The doubles a function uses sit in `.text` just before it (e.g. 0.8 = `9a 99 99 99 99 99 e9 3f`).
 
 ## All objects in link order

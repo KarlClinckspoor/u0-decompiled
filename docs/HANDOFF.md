@@ -1,6 +1,6 @@
 # Handoff: Akalabeth decompilation (u0-decompiled)
 
-State as of 2026-11-13: phases 0 and 1 of docs/PLAN.md are done. Read this first, then
+State as of 2026-11-13: phases 0, 1 and 2 of docs/PLAN.md are done. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -52,7 +52,10 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | `tools/wdosx.py` | WDOSX reader and unpacker (`info`, `unpack`); the LZ format is in its docstring |
 | `tools/coff.py` | DJGPP COFF reader: `info`, `files`, `funcs`, `syms`, `types`, `demangle` |
 | `tools/akdat.py` | AK.DAT reader: `list`, `extract` (to build/akdat, never committed) |
-| `tools/dos.py`, `setup.py`, `exediff.py`, `fat12.py` | copied from u1; to be adapted in phase 2 |
+| `tools/setup.py` | unpacks the sha1-checked archives into `build/tc` (DJGPP tree, binutils 2.7 in `BNU27`, Allegro, libc sources) |
+| `tools/dos.py` | headless DOSBox runner for DJGPP (C: work, D: DJGPP, E: Allegro), output via `redir`, long lines via `@response` files |
+| `tools/gxx.py` | compile one .cc/.c and compare each function with AK.COF by mangled name (docs/MATCHING.md) |
+| `tools/exediff.py`, `fat12.py` | copied from u1; not used yet |
 | `docs/PLAN.md`, `docs/MAP.md` | the plan; the map of AK.EXE |
 
 Git: `master`, local only, author set in the repository's config as in u1. `tools/u1/`
@@ -88,6 +91,7 @@ Git: `master`, local only, author set in the repository's config as in u1. `tool
 | gpp2721b.zip | 681045 | 6e2b72e9b60fb54aa79177b97c39f490e1cc474f | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | cc1plus 2.7.2.1 |
 | lgp271b.zip | 638706 | c13396c901ca3c2ebd8f01a6f751723146fc0296 | www.ludd.luth.se/~ams/djgpp/old/v2gnu/ | libg++ 2.7.1 (libgpp.a, libiostr.a, libstdcx.a) |
 | alleg22.zip | 1007783 | 56f8c1362a3f2920b584201cc159faa0f80e0162 | liballeg.org/files/ | Allegro 2.2 source (1997-03-01) |
+| bnu281b.zip | 1896445 | 7230cb4ab1e3a8a11312fce8c7634e265059cc53 | archive.org item `czchip200001cd` (Czech *Chip* 2000-01 CD), file `ZKUSTE/FREESOFT/BIN/BNU281B/BNU281B.ZIP`, read from the CD image with HTTP range requests | binutils 2.8.1 (files dated 1997-07 to 1998-01): the game's assembler |
 
 gcc 2.7.2.1 is no longer in the DJGPP archive. Its `deleted/v2gnu/gcc2721.txt` points to Martin
 Strömberg's site, which still has it.
@@ -102,9 +106,25 @@ What was checked:
   and crt0.o.
 - Not yet paired: the libc `*.stub` objects and the `fake` (assembly) math objects, which need
   pairing by symbol rather than by file name.
-- Allegro 2.2's makefile builds with `-m486 -O3 -ffast-math -fomit-frame-pointer`. AK.EXE's
-  Allegro functions are 4-byte aligned, which may mean Corey Roth dropped `-m486`, or that gcc
-  2.7.2.1 for DJGPP aligns to 4 even with it. Phase 3 will tell.
+- Allegro 2.2's makefile builds with `-m486 -O3 -ffast-math -fomit-frame-pointer`, and those
+  are the flags AK.EXE's Allegro was built with (phase 2). My earlier doubt came from looking
+  at absolute addresses; alignment is relative to each object.
+
+## Phase 2 (done 2026-11-13): the toolchain runs and matches
+
+docs/MATCHING.md has the details. In short:
+- `tools/setup.py` unpacks the archives (sha1-checked) into `build/tc`. `tools/dos.py` runs
+  DJGPP in headless DOSBox, with output captured through `redir` and long command lines passed
+  as `@response` files. hello.cc compiles, links with `-liostr` and runs (about 4.5 s).
+- **Allegro 2.2 rebuilds identical** (text.c, math.c, gfx.c: code and data, relocated words
+  masked) with gcc 2.7.2.1, the makefile's flags and **binutils 2.7**.
+- **The game is `-O0`, assembled with binutils 2.8.1.** `tools/gxx.py` compiles a .cc and
+  compares each function with AK.COF. First probes all match: `akmenu::akmenu()`,
+  `akmenu::~akmenu()` and `akworld::sgn(int)` (written as `return n = 1;` etc.).
+- Binutils 2.8.1 was not in DJGPP's archive any more. A copy came from a 2000 magazine CD on
+  archive.org (table above).
+- Rebuilding libc from djlsr201 with libc's flags gives libc's code, apart from alignment
+  fillers (libc was assembled with 2.7). That doesn't matter: libc links from the archive.
 
 ## Conventions
 
@@ -117,15 +137,14 @@ What was checked:
 
 ## Next steps
 
-1. **Phase 2, the toolchain.** The archives are in `tools/` (table above). Adapt
-   `tools/setup.py` to unpack them into `build/tc` (all are plain zips; Python's zipfile is
-   enough), and `tools/dos.py` to run gcc in headless DOSBox with CWSDPMI and
-   `DJGPP=...\djgpp.env`. Then smoke-test hello.cc and compile one libc source from djlsr201
-   to see that it gives the archive's object.
-2. **Phase 3**: `tools/libmatch.py` for COFF (compare each library symbol's bytes in AK.COF with
-   the archive members, by name, masking addresses). DJGPP's libc.a and libgpp should match as
-   shipped. Build Allegro 2.2 and match it: that proves gcc's version and flags.
-3. Then `tools/gxx.py` (compile one .cc in DOSBox, compare each function by mangled name) and
-   start on akmenu.cc (2 KB, 5 functions), the smallest game object, to set up the loop.
+1. **Phase 3, libraries and a stand-in link.**
+   - Build all of liballeg.a with its makefile (binutils 2.7) and match every Allegro object,
+     including the `.s` files (the `fake` objects).
+   - Write `tools/libmatch.py`: pair every library object of AK.COF with an archive member by
+     its symbols (not by file name: the `*.stub` and math objects need that), and report.
+   - Then link a COFF from crt0, the libraries and stand-ins for the five game objects, in
+     docs/MAP.md's order, and compare it with AK.COF.
+2. **Phase 4** can start alongside: akmenu.cc (2 KB, 5 functions) is the smallest object;
+   `tools/gxx.py` is the loop.
 4. Optional, any time: a disassembly of `rungame` beside its line table to see how the source's
    statements map to code (`coff.py` has the lines; a small `tools/lines.py` would print them).
