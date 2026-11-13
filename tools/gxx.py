@@ -47,15 +47,34 @@ def disasm(b, addr, n=6):
     return out
 
 
+def window(b, addr, at, before=3, after=4):
+    """Instructions around offset `at`, decoded from the start of the function so that the
+    window starts on an instruction boundary (literals before `at` may still confuse it)."""
+    if _md is None:
+        return ['  %06X %s' % (addr + at, b[at:at + 16].hex(' '))]
+    insns = list(_md.disasm(b[:at + 32], addr))
+    k = next((i for i, x in enumerate(insns) if x.address - addr + x.size > at), len(insns) - 1)
+    out = []
+    for x in insns[max(0, k - before):k + after]:
+        mark = '>' if x is insns[k] else ' '
+        out.append(' %s%06X %-20s %s %s' % (mark, x.address, x.bytes.hex(), x.mnemonic, x.op_str))
+    return out
+
+
 def compile_file(src, flags, bnu27=False):
     os.makedirs(WORK, exist_ok=True)
     base = os.path.basename(src).lower()
     shutil.copy(src, os.path.join(WORK, base))
+    srcdir = os.path.dirname(os.path.abspath(src))
+    for h in os.listdir(srcdir):           # the game's own headers next to the source
+        if h.lower().endswith('.h'):
+            shutil.copy(os.path.join(srcdir, h), os.path.join(WORK, h.lower()))
     obj = os.path.splitext(base)[0] + '.o'
     if os.path.exists(os.path.join(WORK, obj.upper())):
         os.unlink(os.path.join(WORK, obj.upper()))
     b = '-BD:/BNU27/BIN/ ' if bnu27 else ''
-    log = dos.run(WORK, ['gcc %s%s -c %s -o %s' % (b, flags, base, obj)])
+    # -IE:/ finds Allegro 2.2's allegro.h (an include path changes no code)
+    log = dos.run(WORK, ['gcc %s%s -IE:/ -c %s -o %s' % (b, flags, base, obj)])
     path = os.path.join(WORK, obj.upper())
     if not os.path.exists(path):
         print(log)
@@ -100,12 +119,26 @@ def compare(objpath, ak, verbose=False):
         ok = False
         d = diff[0]
         print('  DIFF     %-50s %d bytes, %d differ, first at +%X' % (label, len(mine), len(diff), d))
-        if True:
-            back = max(0, d - 8)
-            print('   mine:')
-            print('\n'.join(disasm(mine[back:], ref.value + back)))
-            print('   AK:')
-            print('\n'.join(disasm(orig[back:], ref.value + back)))
+        for side, data in (('mine', mine), ('AK', orig)):
+            print('   %s:' % side)
+            print('\n'.join(window(data, ref.value, d)))
+    # symbols: when the file is a whole object of AK.COF, its symbol names and offsets (gcc's
+    # L/LC label numbers included) must be the original's too, for the whole-COFF match
+    if funcs and funcs[0].name in bynames:
+        ob = bynames[funcs[0].name].obj
+        if ob is not None and ob.text and ob.text[1] == len(text):
+            base = ob.text[0]
+
+            def symlist(syms, off):
+                return sorted((s.value - off, s.name) for s in syms if s.sclass in (2, 3, 6)
+                              and s.sec == 1 and not s.name.startswith('.') and s.name not in coff.MARKERS)
+            a, b = symlist(ob.syms, base), symlist(o.syms, 0)
+            if a == b:
+                print('  SYMBOLS  identical to %s (%d)' % (ob.name, len(a)))
+            else:
+                first = next(((x, y) for x, y in zip(a, b) if x != y), (len(a), len(b)))
+                print('  SYMBOLS  differ from %s: first original %s, mine %s' % (ob.name, first[0], first[1]))
+                ok = False
     return ok
 
 

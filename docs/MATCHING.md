@@ -78,8 +78,26 @@ Source names must be given in lower case (`foo.cc` is C++; `FOO.CC` is taken for
 - An empty constructor of a class without virtual functions returns `this`
   (`mov eax,[ebp+8]; jmp L; L: leave; ret`). An empty destructor tests the delete flag
   (`and eax,1; test eax,eax; je`), and calls `__builtin_delete(this)` when it is set.
-- String literals of a function follow the function in `.text` (`LCn` labels). Doubles a function
-  uses come before it.
+- String literals and doubles of a function come **before** it in `.text` (`LCn` labels), so
+  they sit between the previous function and this one.
+- Operand order shows in the code: `pos == max` loads the left operand and compares the right one
+  from memory (`mov eax,[pos]; cmp [max],eax`); `max == pos` gives the reverse. In a sum,
+  `4 + t1 + t2` gives `mov eax,[t2]; add eax,4; mov esi,[t1]; add esi,eax`, and `4 + t2 + t1`
+  the reverse. Try the other order when only the registers or operands swap.
+- A bitwise `&` between comparisons (`t1 == 1 & t2 != 1`) gives `cmp/sete dl; movzx eax,dl;
+  cmp/setne cl; movzx edx,cl; and al,dl; test al,al; je`; `&&` would branch instead. The game
+  uses `&` this way throughout akmenu.cc.
+- Locals take frame slots downwards in declaration order. A declaration in the middle of a block
+  (`int key = 0;` after two `ifstream` objects) takes its slot after them. When objects with
+  destructors are in scope, `return x;` stores x in a hidden slot below the locals, runs the
+  destructors (virtual, with flag 2, through the object's ios pointer for an ifstream), and
+  then loads it.
+- A header's `extern inline` function that is used (allegro.h's `textout(..., char *, ...)`) is
+  emitted as a local copy at the end of the object.
+- **Labels are numbered across the whole file, headers included.** The order of `#include`s
+  shows in the label numbers even when the code is identical: akmenu.cc needs `<fstream.h>`
+  before `<allegro.h>` to get the original's numbers (L332 for the textout copy, L455 on in the
+  game's code). `tools/gxx.py` compares the symbols when a file is a whole object.
 - A `switch` with a jump table is `cmp [ebp-N],max; ja default; mov r,[ebp-N];
   mov r,[r*4+table]; mov [ebp-N],r; jmp [ebp-N]`. The table (absolute addresses of the cases)
   sits in `.text` right after the `jmp`, aligned to 4.

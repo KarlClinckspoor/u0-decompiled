@@ -2,7 +2,8 @@
 
 State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
 `.text` and `.data` identical to the original**, from the real libraries and assembly
-stand-ins for the five game objects. Phase 4 (the game in C++) is next. Read this first, then
+stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc matches
+completely, symbols included. Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -70,6 +71,17 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
   symbols against 9382, no line numbers, so ld also sets the F_LNNO flag, 0x107 against 0x103).
   That is ak.cc's `-g` information and the game's local symbols, which the C++ will bring back.
 
+## Phase 4 (started 2026-11-13): the game in C++
+
+| object | state |
+|---|---|
+| akmenu.cc | **done**: `src/akmenu.cc` + `src/akmenu.h`. All 5 functions and the inline textout copy match, and all 53 symbols (label numbers included) are the original's. Stand-in deleted. The link stays identical |
+| akaux.cc, akchar.cc, ak.cc, akworld.cc | stand-ins |
+
+`python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
+names, strings and switch tables. `tools/gxx.py src/NAME.cc` compares functions, and also
+symbols when the file is a whole object.
+
 ## Repository
 
 | file | what |
@@ -84,6 +96,8 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | `tools/libmatch.py` | pairs every library object of AK.COF with an archive member by symbol and compares |
 | `tools/standin.py` | generates `src/standin/*.s`, the assembly stand-ins of the game objects |
 | `tools/build.py` | builds the COFF (C++ where it exists, stand-ins elsewhere), links, compares with AK.COF |
+| `tools/listing.py` | readable disassembly of a game object or function, to write the C++ from |
+| `src/*.cc`, `src/*.h` | the game in C++ (so far akmenu) |
 | `src/standin/*.s` | generated stand-ins for ak.cc, akaux.cc, akchar.cc, akmenu.cc, akworld.cc; each is deleted when its C++ matches |
 | `tools/exediff.py`, `fat12.py` | copied from u1; not used yet |
 | `docs/PLAN.md`, `docs/MAP.md` | the plan; the map of AK.EXE |
@@ -176,8 +190,7 @@ python tools/libmatch.py --quiet # all library objects identical
 python tools/build.py            # SECTIONS IDENTICAL to the original COFF
 ```
 
-1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc (2 KB,
-   5 functions), akaux.cc (5 KB), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
+1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc (done), akaux.cc (5 KB), akchar.cc (9 KB), ak.cc (10 KB, with `-g`: its line numbers
    fix the source's line layout), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB).
    - Loop per function: `tools/gxx.py src/akmenu.cc`.
    - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the

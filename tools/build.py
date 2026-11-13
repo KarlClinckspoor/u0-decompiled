@@ -41,15 +41,20 @@ def build():
     if not os.path.exists(LIBALLEG):
         raise SystemExit('missing %s: build Allegro first (docs/HANDOFF.md, phase 3)' % LIBALLEG)
     shutil.copy(LIBALLEG, os.path.join(WORK, 'LIBALLEG.A'))
+    for h in os.listdir(os.path.join(ROOT, 'src')):
+        if h.lower().endswith('.h'):
+            shutil.copy(os.path.join(ROOT, 'src', h), os.path.join(WORK, h.lower()))
     cmds = []
     for name in OBJS:
         cc = os.path.join(ROOT, 'src', name + '.cc')
         if os.path.exists(cc):
             shutil.copy(cc, os.path.join(WORK, name + '.cc'))
-            cmds.append('gcc %s -c %s.cc -o %s.o' % (CFLAGS.get(name, '-O0'), name, name))
+            cmds.append('gcc %s -IE:/ -c %s.cc -o %s.o' % (CFLAGS.get(name, '-O0'), name, name))
+            print('  %-8s C++      src/%s.cc' % (name, name))
         else:
             shutil.copy(os.path.join(ROOT, 'src', 'standin', name + '.s'), os.path.join(WORK, name + '.s'))
             cmds.append('as -o %s.o %s.s' % (name, name))
+            print('  %-8s stand-in src/standin/%s.s' % (name, name))
     cmds.append('ld -o ak D:/lib/crt0.o -LD:/lib -LC:/ %s -lalleg -liostr -Tdjgpp.djl -lgcc -lc -lgcc'
                 % ' '.join(n + '.o' for n in OBJS))
     log = dos.run(WORK, cmds)
