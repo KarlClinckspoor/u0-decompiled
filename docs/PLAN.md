@@ -6,9 +6,9 @@ Written 2026-11-13. **Status: phases 0 and 1 done (2026-11-13). AK.EXE is unpack
 `.text`. Phase 2 done the same day: gcc 2.7.2.1 runs headless in DOSBox, Allegro objects rebuild
 identical, and the game turns out to be `-O0` assembled with binutils 2.8.1 (docs/MATCHING.md).
 Phase 3 done too: all 257 library objects are identical, and with assembly stand-ins for the
-game the link reproduces the original's headers, `.text` and `.data`. Phase 4, the game in C++,
-is under way: four of the five objects match, only akworld.cc is left. docs/HANDOFF.md has the
-results.** This plan is based on the sister projects
+game the link reproduces the original's headers, `.text` and `.data`. Phase 4 done too: all five
+game files are C++ and AK.COF rebuilds identical, symbol table and line numbers included. Next
+is phase 7, the WDOSX wrapper. docs/HANDOFF.md has the results.** This plan is based on the sister projects
 `../u1-decompiled`, `../u2-decompiled` and `../u3-decompiled` (their README, docs/HANDOFF.md,
 FINDINGS.md, MATCHING.md and U3's PLAN.md), on `../u6md-decompiled/U6-LESSONS_DECOMPILATION.md`,
 and on a first look at the GOG files in `gamedata/`. The goal is the same as theirs: source that

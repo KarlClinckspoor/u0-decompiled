@@ -65,7 +65,12 @@ def main():
             return coff.dm(e[0]) + ('+%d' % e[1] if e[1] else '')
         return None
     lines = line_table(ak)
-    funcs = [(s.value, s) for s, _ in ak.functions(g.obj)]
+    # literals used as doubles (an fld/fmul/... qword operand), whatever their bytes look like
+    doubles = set()
+    for pc0, i in g.code.items():
+        if 'qword ptr' in i.op_str and i.disp_offset and (pc0 + i.disp_offset) in g.relocs:
+            doubles.add(g.relocs[pc0 + i.disp_offset][1])
+    funcs =[(s.value, s) for s, _ in ak.functions(g.obj)]
     funcs += [(v, s) for v, s in g.own.items() if s.sclass == 6 and '__F' in s.name]   # inline copies
     funcs.sort()
     starts = [v for v, _ in funcs]
@@ -94,7 +99,8 @@ def main():
                         if n:
                             ops = ops.replace(hex(v), n)
                             if v in g.own and g.own[v].name.startswith('LC'):
-                                ops += '    ' + text_of(ak.read(v, 200))
+                                ops += '    ' + (repr(struct.unpack('<d', ak.read(v, 8))[0]) if v in doubles
+                                                     else text_of(ak.read(v, 200)))
                 if i.mnemonic in ('call', 'jmp') or i.mnemonic.startswith('j'):
                     try:
                         v = int(i.op_str, 16)
@@ -121,8 +127,9 @@ def main():
                     if raw.endswith(b'\0' + f):     # alignment filler after the last string
                         raw = raw[:-len(f)]
                         break
-                if end - pc == 8 and raw.count(0) < 7 and not raw.rstrip(b'\0').isascii():
-                    print('%s:  double %r' % (lab.name, struct.unpack('<d', raw)[0]))
+                if pc in doubles or (end - pc == 8 and raw.count(0) < 7 and not raw.rstrip(b'\0').isascii()):
+                    print('%s:  double %r   (%s)' % (lab.name, struct.unpack('<d', ak.read(pc, 8))[0],
+                                                    ak.read(pc, 8).hex(' ')))
                 else:
                     for k, part in enumerate(raw.split(b'\0')[:-1]):
                         print('%s  %s' % ((lab.name + ':') if k == 0 else ' ' * (len(lab.name) + 1), text_of(part)))

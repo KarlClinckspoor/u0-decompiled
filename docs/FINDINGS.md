@@ -29,6 +29,21 @@ play**, unless marked otherwise.
   the amount is `rand() % (5 * level) + level` with a dungeon level of at least 1.
 - Oddities in ak.cc: `rungame` counts moves in `i` and declares `char string[10]`, and uses
   neither; in the dungeon, `y` is a case of its own that does nothing.
+- **Towns are never thinned out** (akworld.cc `createworld`). After the terrain roll comes
+  `if (world[x][y] == 3 & rand() % 100 > 50) world[x][y] = 3;`, which sets the square to the
+  value it already has. Probably meant to turn half of the towns back into plains.
+- **More uninitialised buffers** (akworld.cc `movemonsters`). The damage a monster does is
+  written by `itoa` into `char *string`, a pointer that is never set: the text lands wherever
+  the stale stack value points, then is printed from there.
+- **The ranged attack's edge check is mistyped** (akworld.cc `attack`). The fourth test is
+  `player.py * player.dy * y < 0` where `player.py + player.dy * y < 1` was meant, so a shot
+  north is not stopped at the edge and reads `dng` outside the row. A thrown axe, an arrow or a
+  magic attack that finds nothing within 5 squares then hits whatever is on the square next to
+  the player.
+- **Three monster strokes do not shrink with distance** (akworld.cc `drawmonsters`). The daemon's
+  `x + 17`, `x - 17` and `y - 7` lack the `/ dist` of every other offset.
+- **The intro demonstration is dead code** (akworld.cc `viewintro`): nothing calls it. It also
+  sets the akworld's own unused `sav` instead of the player's record.
 - `lb()` and `death()` are reached as `int` functions that fall off their end (`lb`) or return
   nothing (`death` is void); `lb`'s return value is garbage when it falls off the end.
 
@@ -69,4 +84,31 @@ play**, unless marked otherwise.
 - **Death** (`checkstatus` returning 2) goes back to the menu. Choosing "Journey Onward" without
   a PLAYER.U0 leads to character creation (`loadgame` returns 1). "View Ending" sets the level
   of play to 10 and the quest to finished, then plays Lord British's last speech.
+- **The world map** (akworld.cc `createworld`): 21x21 with a border of mountains. Each square
+  is `floor(RND^5 * 4.5)`: 0 plains (the most common), 1 mountains, 2 a tree, 3 a town, 4 a
+  dungeon entrance (rare). One castle (5) at a random place. A new game starts on a town at a
+  random place; a loaded game gets an extra town at a random place. The map comes from the
+  lucky number (`srandom(ln)`), so the same character always gets the same world.
+- **Dungeon levels** (akworld.cc `createdungeon`): seeded with `ln * 3 + level`, so each level
+  of a game is always the same. A grid of walls with, per wall gap, 4% traps, 29% hidden doors,
+  59% doors, 2% ladders down and 5% chests (later rolls overwrite earlier ones). The ladders sit
+  at (7,3) and (3,7), up and down swapping with the level's parity. Level 1 has the exit at
+  (1,1).
+- **Monsters** (akworld.cc `createmonsters`): monster x (1 skeleton ... 10 balrog) appears on
+  levels deeper than x - 2, on a free square, with `x * 2 + level * 2 + level of play` hit points.
+- **The player's attack** (akworld.cc `attack`): weapon damage rapier 10, axe 5 (or throw it,
+  range 5, and lose it), shield 1, bow 4 (range 5), bare hands 0, magic attack level + 10. A hit
+  does `rand() % weapon + strength / 5` (strength / 5 bare-handed). It misses when
+  `dexterity - rand() % 25 < monster + level`. A kill adds `monster * level / 2` to `lk` (the
+  hit points granted on leaving the dungeon) and gives `monster + level` gold. Killing the quest
+  monster finishes the quest (two tones).
+- **The magic amulet**: a mage picks the spell, a fighter gets a random one: 1 ladder up and 2
+  ladder down (a ladder appears under the player), 3 magic attack, 4 a random bad effect: turned
+  into a toad (strength to wisdom set to 3), into a lizard man (hit points to wisdom * 2.5) or a
+  backfire (half the hit points). Each use has a 24% chance of being the amulet's last.
+- **The monsters' turn** (akworld.cc `movemonsters`): a monster weaker than
+  `((x + level) * 2 + level of play) * 0.3` flees, the others close in, along y if that square is free, else along x. Next to the player it
+  attacks: it hits when `rand() % 20 - (shield ? 1 : 0) - stamina + x + level >= 0`, doing
+  `rand() % x + level` damage. The thief and the gremlin steal instead 10% of the time: the
+  gremlin half the food, the thief one item. The mimic never moves.
 - **The quotes and credits** (akaux.cc) scroll one pixel per 100 ms until a key is pressed.

@@ -188,6 +188,27 @@ values (`E e X x`), while their numbers follow the order of the source. `gxx.py`
 sorts by address and misses this; the DEBUG check compares the symbol table in order and finds
 it. In ak.cc: `X x E e` on the world map, `X x K k E e` in the dungeon, `Q q 19` for saving.
 
+### More from akworld.cc
+
+- **Reading 74 KB of -O0 code**: `tools/pseudo.py` turns it into pseudo code close enough to
+  transcribe. `drawmonsters` (340 calls to `line()`) was generated from that output by a script
+  and matched on the first compile. The order of a commutative sum shows in the pseudo code's
+  term order: gcc evaluates the more complex operand first, so `x + 9 / dist` prints as
+  `(9 / p2) + v8`.
+- **x87 comparisons**: `if (a < b)` gives `and ah,0x45; jne skip`, `!(a < b)` gives `je skip`,
+  and `a >= b` uses `dec ah; cmp ah,0x40; jae`. The pattern `and ah,0x45; jne else; jmp end`
+  comes from an empty then-part: `if (mz[x][1] < ...) ; else { ... }` (`movemonsters`).
+- **A dead `jmp` right after a `goto`** inside an `if` means an `else`: `if (c) goto hit; else
+  { ... }`. gcc emits the jump over the else-part even after the `goto`.
+- **Labels without jumps**: a user label that nothing jumps to still gets an `L` number and a
+  symbol. `drawdungeon` has one after its loop, and `movemonsters` has two labels at the end of
+  its loop body (the mimic's `goto` uses the second). Only the symbol table shows them.
+- **Casts show**: `(int)(x / 3.0)` converts before an integer subtraction, while `159 - x / 3.0`
+  would subtract in floating point; `lk + (int)floor(...)` likewise. `floor()` of an int (the
+  BASIC's INT) is common and costs a conversion.
+- **Locals declared but never used still take their slot**: the constructor's unused `int y`
+  is visible only in the frame size (`sub esp,0x28`).
+
 ## The link (proven in phase 3)
 
 gcc 2.7.2.1 links with
@@ -197,6 +218,7 @@ ld -o ak crt0.o ak.o akaux.o akchar.o akmenu.o akworld.o -lalleg -liostr -Tdjgpp
 ```
 
 and then runs `stubify` (which the COFF comparison leaves out). That command, with liballeg.a
-built by `tools/buildalleg.py` and the stand-ins, reproduces AK.COF's headers, `.text` and `.data`
-exactly (`tools/build.py`). The game objects must therefore keep their exact sizes. Each ends on
+built by `tools/buildalleg.py` and the stand-ins, reproduced AK.COF's headers, `.text` and `.data`
+exactly (`tools/build.py`). With the five game files in C++ (phase 4) the whole file is identical,
+symbol table and line numbers included. The game objects must therefore keep their exact sizes. Each ends on
 a 4-byte boundary, and ld places objects back to back.

@@ -147,6 +147,8 @@ class akworld : public charsave {  /* 3716 bytes; the base is the member named "
     int xx[11], yy[11];        /* 3452, 3496 */
     int mz[11][2], ml[11][2];  /* 3540, 3628 */
 };
+/* akworld's own charsave base is used only by viewintro (which is never called); the player's
+   record is always passed in as a savestruct reference. */
 class akmenu { int t1, t2, pos, max; };   /* 16 bytes */
 class akaux { };                          /* 1 byte: no members */
 ```

@@ -1,10 +1,10 @@
 # Handoff: Akalabeth decompilation (u0-decompiled)
 
-State as of 2026-11-13: phases 0 to 3 of docs/PLAN.md are done. **The program links with
-`.text` and `.data` identical to the original**, from the real libraries and assembly
-stand-ins for the game objects. Phase 4 (the game in C++) has started: akmenu.cc,
-akaux.cc, akchar.cc and ak.cc match completely, symbols included (ak.cc's `-g` debug symbols and
-line numbers too). Only akworld.cc is left. Read this first, then
+State as of 2026-11-13: phases 0 to 4 of docs/PLAN.md are done. **AK.COF, the program
+inside AK.EXE, rebuilds identical byte for byte** from the five game files in C++ (`src/`), the
+rebuilt Allegro and the shipped DJGPP libraries: headers, code, data, all 9382 symbols and
+all 316 line numbers. No stand-ins are left. Next: phase 7 (re-wrapping it into AK.EXE) and the
+readable and mechanics passes (phases 5 and 6). Read this first, then
 docs/PLAN.md and docs/MAP.md. The sister projects `../u1-decompiled` (compiled C, the closest
 model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions.
 
@@ -72,7 +72,7 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
   symbols against 9382, no line numbers, so ld also sets the F_LNNO flag, 0x107 against 0x103).
   That is ak.cc's `-g` information and the game's local symbols, which the C++ will bring back.
 
-## Phase 4 (started 2026-11-13): the game in C++
+## Phase 4 (done 2026-11-13): the game in C++
 
 | object | state |
 |---|---|
@@ -80,10 +80,16 @@ model), `../u2-decompiled` and `../u3-decompiled` are the models for conventions
 | akaux.cc | **done**: `src/akaux.cc` + `src/akaux.h` + `src/ak.h` (AK.DAT's object indexes). All 6 functions, the quote and credit tables, the two inline copies and all 158 symbols match. Stand-in deleted |
 | akchar.cc | **done**: `src/akchar.cc` + `src/akchar.h`. All 9 functions (character creation, shop, save/load, Lord British, upkeep, death) and all 249 symbols match. Stand-in deleted. The tricky part, end-of-function dead jumps that depend on the functions before them, is explained in MATCHING.md |
 | ak.cc | **done**: `src/ak.cc` + `src/akworld.h`. Compiled `-O0 -g`. All 3 functions (`rungame`, `rundungeon`, `main`) and the textout copy match. So do the 185 label symbols, all 1179 debug symbols (types, locals, blocks, `.bf`/`.ef`) and all 316 line numbers. Stand-in deleted |
-| akworld.cc | stand-in |
+| akworld.cc | **done**: `src/akworld.cc` + `src/akworld.h`. All 12 functions match, among them `drawmonsters` (39 KB, 340 `line()` calls) and `drawdungeon` (14 KB), plus the 4 inline copies (textout, textout_centre, line, putpixel) and all 382 symbols. Written from `tools/pseudo.py`'s output; `drawmonsters` was generated from it by a script. Stand-in deleted |
+
+With all five files in C++, `tools/build.py` reports **whole file: IDENTICAL**. AK.COF is
+reproduced completely, symbol table and line numbers included.
 
 `python tools/listing.py OBJ [FUNC]` prints a readable disassembly to write from, with symbol
-names, strings, switch tables and, for ak.cc, the source line of each statement.
+names, strings, doubles, switch tables and, for ak.cc, the source line of each statement.
+`python tools/pseudo.py OBJ [FUNC]` folds the -O0 code back into C-like pseudo code: registers,
+spill slots and the x87 stack become expressions, member accesses get names and array indexes,
+one line per store, call or branch (`PSEUDO_TEMPS=94,90` forces frame slots to be temporaries).
 `tools/gxx.py src/NAME.cc` compares functions, and also symbols when the file is a whole object.
 For a `-g` object it also compares every debug symbol and the line numbers (`DEBUG`, `LINES`).
 
@@ -197,16 +203,12 @@ python tools/libmatch.py --quiet # all library objects identical
 python tools/build.py            # SECTIONS IDENTICAL to the original COFF
 ```
 
-1. **Phase 4, the game in C++**, one object at a time, smallest first: akmenu.cc, akaux.cc,
-   akchar.cc and ak.cc (done), then akworld.cc (74 KB, of which `drawmonsters` is 39 KB). Its
-   function return types are still guesses in `src/akworld.h` (ak.cc never uses them).
-   - Loop per function: `tools/gxx.py src/akmenu.cc`.
-   - When a whole object matches, `tools/build.py` picks up `src/NAME.cc` instead of the
-     stand-in, and the sections must stay identical. Delete the stand-in then.
-   - The class layouts are in docs/MAP.md; MATCHING.md has the -O0 code patterns.
-   - akworld.cc can go to parallel agents by function once the first objects have set the
-     conventions (lesson 11 of docs/PLAN.md).
-2. Then the symbol table: with all five objects in C++ (ak.cc with `-g`), compare the whole
-   COFF, symbols and line numbers included.
-3. With ak.cc done, the symbol table differs only by akworld.cc's stand-in symbols (9337 symbols
-   against 9382; the line numbers, 316, are already complete).
+1. **Phase 7, the shipped file**: wrap our AK.COF into AK.EXE. Try WDOSX 0.97's `stubit` in
+   DOSBox first (needs a download, ask Karl); otherwise a `tools/postlink.py` that re-packs with
+   the Python port of the LZ format in `tools/wdosx.py`, taking the kernel and stub bytes from
+   gamedata at build time. Gate: AK.EXE's sha1.
+2. **Phase 5, readable pass**: the names of akworld.cc's locals and parameters are guesses (it
+   has no `-g`); magic numbers (map values, colours, key codes) could become named constants
+   where the rebuild allows. Every change is checked by `tools/build.py`.
+3. **Phase 6, mechanics**: docs/game/ from docs/FINDINGS.md, and check the findings in play
+   (DOSBox with the GOG game).

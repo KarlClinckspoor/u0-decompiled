@@ -25,16 +25,16 @@ public:
 
     akworld();
     ~akworld();
-    void createworld(int mode, charsave::savestruct &sav);
-    void drawworld(charsave::savestruct &sav);
-    void createdungeon(charsave::savestruct &sav);
-    void drawdungeon(charsave::savestruct &sav);
-    void createmonsters(charsave::savestruct &sav);
-    void drawmonsters(int a, int b);
-    void attack(charsave::savestruct &sav);
-    void movemonsters(charsave::savestruct &sav);
+    int createworld(int mode, charsave::savestruct &player);
+    int drawworld(charsave::savestruct &player);
+    int createdungeon(charsave::savestruct &player);
+    int drawdungeon(charsave::savestruct &player);
+    int createmonsters(charsave::savestruct &player);
+    int drawmonsters(int type, int dist);
+    int attack(charsave::savestruct &player);
+    int movemonsters(charsave::savestruct &player);
     int sgn(int n);
-    void viewintro(charsave::savestruct &sav);
+    int viewintro(charsave::savestruct &player);
 };
 
 #endif
