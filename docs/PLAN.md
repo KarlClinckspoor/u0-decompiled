@@ -202,8 +202,6 @@ against the archive.
 
 ## 5. Open questions and risks
 
-- **The packer.** Without the WDOSX source, phase 1 means reverse-engineering the decompressor
-  from the kernel code. That is doable (it is small 32-bit assembly) but slower.
 - **Exact compiler version.** gcc 2.7.2 or 2.7.2.1, and the binutils version. Allegro (phase 3)
   answers this. If neither matches, a DJGPP 2.00/2.02 era compiler is the next candidate.
 - **The COFF header and symbol table.** A whole-COFF match also needs the header timestamp (GNU ld
@@ -222,7 +220,7 @@ against the archive.
   functions dominate: `drawmonsters` (39 KB) and `drawdungeon` (14 KB), probably long runs of
   similar drawing calls. Smaller than U1's OUT.EXE in function count, larger in bytes.
 - **The packer (settled in phase 1).** The decoder is understood. For phase 7, WDOSX's packer
-  must still give the same packed bytes, and the junk after the WFSE name (§HANDOFF) must be
+  must still give the same packed bytes, and the junk after the WFSE name (docs/HANDOFF.md) must be
   reproduced or copied.
 - **ak.cc's line numbers (found in phase 1).** A whole-COFF match includes ak.cc's 316 line
   numbers, so its source must keep the original line layout. The other four objects have none.
