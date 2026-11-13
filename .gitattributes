@@ -1,0 +1,3 @@
+# DOS assemblers need CRLF line ends: keep assembly sources byte for byte
+*.ASM -text
+*.asm -text
