@@ -1,0 +1,316 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="237" viewBox="0 0 840 237" font-family="Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="Decompilation progress: 36 of 36 functions matched">
+<rect width="840" height="237" rx="14" fill="#0f172a"/>
+<text x="20" y="38" font-size="21" fill="#ffffff">Decompilation progress</text>
+<text x="820" y="38" font-size="15" fill="#ffffff" text-anchor="end">u0-decompiled</text>
+<text x="20" y="62" font-size="15" fill="#e5e7eb">36 / 36 functions matched (100.0%)</text>
+<rect x="20" y="74" width="800" height="18" rx="5" fill="#334155"/>
+<rect x="20" y="74" width="800.00" height="18" rx="5" fill="#2a8c3c"/>
+<rect x="20" y="104" width="10" height="10" fill="#2a8c3c"/>
+<text x="34" y="113" font-size="12" fill="#e5e7eb">Matched: 36</text>
+<rect x="232" y="104" width="10" height="10" fill="#b8860b"/>
+<text x="246" y="113" font-size="12" fill="#e5e7eb">Attempt: 0</text>
+<rect x="430" y="104" width="10" height="10" fill="#64748b"/>
+<text x="444" y="113" font-size="12" fill="#e5e7eb">Open: 0</text>
+<rect x="628" y="104" width="10" height="10" fill="#b94a53"/>
+<text x="642" y="113" font-size="12" fill="#e5e7eb">Aside: 263</text>
+<text x="20" y="140" font-size="11" fill="#e5e7eb">Function map: 1 game function per tile; each Aside tile is one library object (crt0, Allegro, libc, libgcc, iostreams), in link order</text>
+<rect x="20.00" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>crt0.s (aside)</title></rect>
+<rect x="31.11" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>001600 rungame(charsave &amp;, akworld &amp;) (matched)</title></rect>
+<rect x="42.22" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>001ED4 rundungeon(charsave &amp;, akworld &amp;) (matched)</title></rect>
+<rect x="53.33" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003834 main (matched)</title></rect>
+<rect x="64.44" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003C9C static textout(BITMAP *, FONT *, char *, int, int, int) (matched)</title></rect>
+<rect x="75.56" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003D08 akaux::akaux() (matched)</title></rect>
+<rect x="86.67" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003D5C akaux::~akaux() (matched)</title></rect>
+<rect x="97.78" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003DB4 akaux::hello() (matched)</title></rect>
+<rect x="108.89" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>003E88 akaux::instruct() (matched)</title></rect>
+<rect x="120.00" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>004844 akaux::quotes() (matched)</title></rect>
+<rect x="131.11" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>004D30 akaux::shoutouts() (matched)</title></rect>
+<rect x="142.22" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>004F9C charsave::charsave() (matched)</title></rect>
+<rect x="153.33" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>004FB4 charsave::~charsave() (matched)</title></rect>
+<rect x="164.44" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>005134 charsave::charcreate() (matched)</title></rect>
+<rect x="175.56" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0056B8 charsave::shop(int) (matched)</title></rect>
+<rect x="186.67" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>00610C charsave::savegame() (matched)</title></rect>
+<rect x="197.78" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0061C4 charsave::loadgame() (matched)</title></rect>
+<rect x="208.89" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0064CC charsave::lb() (matched)</title></rect>
+<rect x="220.00" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>006C98 charsave::checkstatus() (matched)</title></rect>
+<rect x="231.11" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0070DC charsave::death() (matched)</title></rect>
+<rect x="242.22" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0071E4 akmenu::akmenu() (matched)</title></rect>
+<rect x="253.33" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0071F0 akmenu::~akmenu() (matched)</title></rect>
+<rect x="264.44" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>007240 akmenu::runmenu(char **) (matched)</title></rect>
+<rect x="275.56" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>007404 akmenu::draw(char **) (matched)</title></rect>
+<rect x="286.67" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>007550 akmenu::redraw(char **) (matched)</title></rect>
+<rect x="297.78" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>007A48 akworld::akworld() (matched)</title></rect>
+<rect x="308.89" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>008708 akworld::~akworld() (matched)</title></rect>
+<rect x="320.00" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>00876C akworld::createworld(int, charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="331.11" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>008C34 akworld::drawworld(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="342.22" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>009244 akworld::createdungeon(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="353.33" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>00991C akworld::drawdungeon(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="364.44" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>00CF20 akworld::createmonsters(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="375.56" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>00D244 akworld::drawmonsters(int, int) (matched)</title></rect>
+<rect x="386.67" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>016C28 akworld::attack(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="397.78" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>018194 akworld::movemonsters(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="408.89" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>019700 akworld::sgn(int) (matched)</title></rect>
+<rect x="420.00" y="160.00" width="11.11" height="11.11" fill="#2a8c3c" stroke="#0f172a" stroke-width="1"><title>0197D4 akworld::viewintro(charsave::savestruct &amp;) (matched)</title></rect>
+<rect x="431.11" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>midi.c (aside)</title></rect>
+<rect x="442.22" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>keyboard.c (aside)</title></rect>
+<rect x="453.33" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>text.c (aside)</title></rect>
+<rect x="464.44" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>allegro.c (aside)</title></rect>
+<rect x="475.56" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>timer.c (aside)</title></rect>
+<rect x="486.67" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>gfx.c (aside)</title></rect>
+<rect x="497.78" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sound.c (aside)</title></rect>
+<rect x="508.89" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>graphics.c (aside)</title></rect>
+<rect x="520.00" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>datafile.c (aside)</title></rect>
+<rect x="531.11" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>file.c (aside)</title></rect>
+<rect x="542.22" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dpmi.c (aside)</title></rect>
+<rect x="553.33" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>adlib.c (aside)</title></rect>
+<rect x="564.44" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>irq.c (aside)</title></rect>
+<rect x="575.56" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>blit.c (aside)</title></rect>
+<rect x="586.67" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="597.78" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>gus.c (aside)</title></rect>
+<rect x="608.89" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sb.c (aside)</title></rect>
+<rect x="620.00" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>mpu.c (aside)</title></rect>
+<rect x="631.11" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>digmid.c (aside)</title></rect>
+<rect x="642.22" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dma.c (aside)</title></rect>
+<rect x="653.33" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>vga.c (aside)</title></rect>
+<rect x="664.44" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>modex.c (aside)</title></rect>
+<rect x="675.56" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>vbeaf.c (aside)</title></rect>
+<rect x="686.67" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>vesa.c (aside)</title></rect>
+<rect x="697.78" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ati.c (aside)</title></rect>
+<rect x="708.89" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>cirrus.c (aside)</title></rect>
+<rect x="720.00" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>paradise.c (aside)</title></rect>
+<rect x="731.11" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>s3.c (aside)</title></rect>
+<rect x="742.22" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>trident.c (aside)</title></rect>
+<rect x="753.33" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>tseng.c (aside)</title></rect>
+<rect x="764.44" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>video7.c (aside)</title></rect>
+<rect x="775.56" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="786.67" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="797.78" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="808.89" y="160.00" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>mouse.c (aside)</title></rect>
+<rect x="20.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sprite.c (aside)</title></rect>
+<rect x="31.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="42.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="53.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="64.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>math.c (aside)</title></rect>
+<rect x="75.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdstreams.cc (aside)</title></rect>
+<rect x="86.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>iostream.cc (aside)</title></rect>
+<rect x="97.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fstream.cc (aside)</title></rect>
+<rect x="108.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>streambuf.cc (aside)</title></rect>
+<rect x="120.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdstrbufs.cc (aside)</title></rect>
+<rect x="131.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>genops.c (aside)</title></rect>
+<rect x="142.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>isgetline.cc (aside)</title></rect>
+<rect x="153.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ioseekpos.c (aside)</title></rect>
+<rect x="164.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ioseekoff.c (aside)</title></rect>
+<rect x="175.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>isscan.cc (aside)</title></rect>
+<rect x="186.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>iopadn.c (aside)</title></rect>
+<rect x="197.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>outfloat.c (aside)</title></rect>
+<rect x="208.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>filebuf.cc (aside)</title></rect>
+<rect x="220.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fileops.c (aside)</title></rect>
+<rect x="231.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdiostream.cc (aside)</title></rect>
+<rect x="242.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>iogetline.c (aside)</title></rect>
+<rect x="253.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sbscan.cc (aside)</title></rect>
+<rect x="264.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>floatconv.c (aside)</title></rect>
+<rect x="275.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>filedoalloc.c (aside)</title></rect>
+<rect x="286.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ioprims.c (aside)</title></rect>
+<rect x="297.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>iovfscanf.c (aside)</title></rect>
+<rect x="308.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ioungetc.c (aside)</title></rect>
+<rect x="320.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_op_delete.c (aside)</title></rect>
+<rect x="331.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_op_vdel.c (aside)</title></rect>
+<rect x="342.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_umoddi3.c (aside)</title></rect>
+<rect x="353.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_udivdi3.c (aside)</title></rect>
+<rect x="364.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_op_vnew.c (aside)</title></rect>
+<rect x="375.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_op_new.c (aside)</title></rect>
+<rect x="386.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_new_handler.c (aside)</title></rect>
+<rect x="397.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>npxsetup.c (aside)</title></rect>
+<rect x="408.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ident.c (aside)</title></rect>
+<rect x="420.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>crt1.c (aside)</title></rect>
+<rect x="431.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="442.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>infostrc.c (aside)</title></rect>
+<rect x="453.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sound.c (aside)</title></rect>
+<rect x="464.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>itoa.c (aside)</title></rect>
+<rect x="475.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>rand.c (aside)</title></rect>
+<rect x="486.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="497.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strlen.c (aside)</title></rect>
+<rect x="508.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_main.c (aside)</title></rect>
+<rect x="520.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>exit.c (aside)</title></rect>
+<rect x="531.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>printf.c (aside)</title></rect>
+<rect x="542.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strsep.c (aside)</title></rect>
+<rect x="553.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strchr.c (aside)</title></rect>
+<rect x="564.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>conio.c (aside)</title></rect>
+<rect x="575.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>atoi.c (aside)</title></rect>
+<rect x="586.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>random.c (aside)</title></rect>
+<rect x="597.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="608.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strcat.c (aside)</title></rect>
+<rect x="620.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fopen.c (aside)</title></rect>
+<rect x="631.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stderr.c (aside)</title></rect>
+<rect x="642.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fprintf.c (aside)</title></rect>
+<rect x="653.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fwrite.c (aside)</title></rect>
+<rect x="664.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fclose.c (aside)</title></rect>
+<rect x="675.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fseek.c (aside)</title></rect>
+<rect x="686.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fread.c (aside)</title></rect>
+<rect x="697.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>abs.c (aside)</title></rect>
+<rect x="708.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="720.00" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="731.11" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>gopint.c (aside)</title></rect>
+<rect x="742.22" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>malloc.c (aside)</title></rect>
+<rect x="753.33" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dmgw.c (aside)</title></rect>
+<rect x="764.44" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dmpw.c (aside)</title></rect>
+<rect x="775.56" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0300_z.S (aside)</title></rect>
+<rect x="786.67" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getdos_v.c (aside)</title></rect>
+<rect x="797.78" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>atexit.c (aside)</title></rect>
+<rect x="808.89" y="171.11" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dpmiexcp.c (aside)</title></rect>
+<rect x="20.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_write.c (aside)</title></rect>
+<rect x="31.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strcpy.c (aside)</title></rect>
+<rect x="42.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getenv.c (aside)</title></rect>
+<rect x="53.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stricmp.stub (aside)</title></rect>
+<rect x="64.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strtol.c (aside)</title></rect>
+<rect x="75.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>errno.c (aside)</title></rect>
+<rect x="86.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sprintf.c (aside)</title></rect>
+<rect x="97.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ct_lower.c (aside)</title></rect>
+<rect x="108.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>findfirst.stub (aside)</title></rect>
+<rect x="120.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="131.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>findnext.stub (aside)</title></rect>
+<rect x="142.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>open.stub (aside)</title></rect>
+<rect x="153.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>close.stub (aside)</title></rect>
+<rect x="164.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>lseek.stub (aside)</title></rect>
+<rect x="175.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>tmpnam.c (aside)</title></rect>
+<rect x="186.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>read.stub (aside)</title></rect>
+<rect x="197.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>write.stub (aside)</title></rect>
+<rect x="208.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0800.S (aside)</title></rect>
+<rect x="220.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0600.S (aside)</title></rect>
+<rect x="231.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0801.S (aside)</title></rect>
+<rect x="242.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0000.S (aside)</title></rect>
+<rect x="253.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0007.S (aside)</title></rect>
+<rect x="264.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0008.S (aside)</title></rect>
+<rect x="275.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0001.S (aside)</title></rect>
+<rect x="286.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0006.S (aside)</title></rect>
+<rect x="297.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0601.S (aside)</title></rect>
+<rect x="308.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0204.S (aside)</title></rect>
+<rect x="320.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0205.S (aside)</title></rect>
+<rect x="331.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0101.S (aside)</title></rect>
+<rect x="342.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0100.S (aside)</title></rect>
+<rect x="353.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>nearptr.c (aside)</title></rect>
+<rect x="364.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dosmemput.stub (aside)</title></rect>
+<rect x="375.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dosmemget.stub (aside)</title></rect>
+<rect x="386.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strncmp.c (aside)</title></rect>
+<rect x="397.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>gormcb.c (aside)</title></rect>
+<rect x="408.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>memcpy.s (aside)</title></rect>
+<rect x="420.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ct_flags.c (aside)</title></rect>
+<rect x="431.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdout.c (aside)</title></rect>
+<rect x="442.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fflush.c (aside)</title></rect>
+<rect x="453.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdin.c (aside)</title></rect>
+<rect x="464.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>memmove.s (aside)</title></rect>
+<rect x="475.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fileno.c (aside)</title></rect>
+<rect x="486.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getc.c (aside)</title></rect>
+<rect x="497.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>memchr.c (aside)</title></rect>
+<rect x="508.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>huge_val.c (aside)</title></rect>
+<rect x="520.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>isatty.stub (aside)</title></rect>
+<rect x="531.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fstat.c (aside)</title></rect>
+<rect x="542.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strtoul.c (aside)</title></rect>
+<rect x="553.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0e01.S (aside)</title></rect>
+<rect x="564.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="575.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>cntrl87.S (aside)</title></rect>
+<rect x="586.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dxeload.c (aside)</title></rect>
+<rect x="597.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="608.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0400.S (aside)</title></rect>
+<rect x="620.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>md.S (aside)</title></rect>
+<rect x="631.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>abort.c (aside)</title></rect>
+<rect x="642.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>putenv.c (aside)</title></rect>
+<rect x="653.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_use_lfn.c (aside)</title></rect>
+<rect x="664.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>c1args.c (aside)</title></rect>
+<rect x="675.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>c1loadef.c (aside)</title></rect>
+<rect x="686.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdiohk.c (aside)</title></rect>
+<rect x="697.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>setmode.c (aside)</title></rect>
+<rect x="708.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>doprnt.c (aside)</title></rect>
+<rect x="720.00" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dmp.c (aside)</title></rect>
+<rect x="731.11" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dmg.c (aside)</title></rect>
+<rect x="742.22" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scsetc.c (aside)</title></rect>
+<rect x="753.33" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scgetc.c (aside)</title></rect>
+<rect x="764.44" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scattrib.c (aside)</title></rect>
+<rect x="775.56" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scputc.c (aside)</title></rect>
+<rect x="786.67" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>kbhit.c (aside)</title></rect>
+<rect x="797.78" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>vsprintf.c (aside)</title></rect>
+<rect x="808.89" y="182.22" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>doscan.c (aside)</title></rect>
+<rect x="20.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>sccols.c (aside)</title></rect>
+<rect x="31.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scrows.c (aside)</title></rect>
+<rect x="42.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>scmode.c (aside)</title></rect>
+<rect x="53.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>allocfil.c (aside)</title></rect>
+<rect x="64.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fmode.c (aside)</title></rect>
+<rect x="75.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>open.c (aside)</title></rect>
+<rect x="86.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>lseek.c (aside)</title></rect>
+<rect x="97.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dosio.c (aside)</title></rect>
+<rect x="108.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>flsbuf.c (aside)</title></rect>
+<rect x="120.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>close.c (aside)</title></rect>
+<rect x="131.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>remove.c (aside)</title></rect>
+<rect x="142.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ftell.c (aside)</title></rect>
+<rect x="153.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>filbuf.c (aside)</title></rect>
+<rect x="164.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>memset.s (aside)</title></rect>
+<rect x="175.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>mdw.S (aside)</title></rect>
+<rect x="186.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0200.S (aside)</title></rect>
+<rect x="197.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0201.S (aside)</title></rect>
+<rect x="208.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0202.S (aside)</title></rect>
+<rect x="220.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0203.S (aside)</title></rect>
+<rect x="231.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0303.S (aside)</title></rect>
+<rect x="242.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d0304.S (aside)</title></rect>
+<rect x="253.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dpmi_lsl.S (aside)</title></rect>
+<rect x="264.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>dpmi_lsl.s (aside)</title></rect>
+<rect x="275.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>osmajor.c (aside)</title></rect>
+<rect x="286.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>osminor.c (aside)</title></rect>
+<rect x="297.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>osflavor.c (aside)</title></rect>
+<rect x="308.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>write.c (aside)</title></rect>
+<rect x="320.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fsext.c (aside)</title></rect>
+<rect x="331.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>doserr2e.c (aside)</title></rect>
+<rect x="342.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stricmp.c (aside)</title></rect>
+<rect x="353.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>findfirs.c (aside)</title></rect>
+<rect x="364.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>findnext.c (aside)</title></rect>
+<rect x="375.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>access.c (aside)</title></rect>
+<rect x="386.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>read.c (aside)</title></rect>
+<rect x="397.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>djmd.s (aside)</title></rect>
+<rect x="408.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>isatty.c (aside)</title></rect>
+<rect x="420.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>xstat.c (aside)</title></rect>
+<rect x="431.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>lfnftime.c (aside)</title></rect>
+<rect x="442.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>filelen.c (aside)</title></rect>
+<rect x="453.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getuid.c (aside)</title></rect>
+<rect x="464.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getgid.c (aside)</title></rect>
+<rect x="475.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>time.c (aside)</title></rect>
+<rect x="486.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>is_exec.c (aside)</title></rect>
+<rect x="497.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>getdinfo.c (aside)</title></rect>
+<rect x="508.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_open.c (aside)</title></rect>
+<rect x="520.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_read.c (aside)</title></rect>
+<rect x="531.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_close.c (aside)</title></rect>
+<rect x="542.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strcmp.c (aside)</title></rect>
+<rect x="553.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>d_getdrv.c (aside)</title></rect>
+<rect x="564.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ct_upper.c (aside)</title></rect>
+<rect x="575.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>c1pglob.c (aside)</title></rect>
+<rect x="586.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>calloc.c (aside)</title></rect>
+<rect x="597.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strncpy.c (aside)</title></rect>
+<rect x="608.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strncat.c (aside)</title></rect>
+<rect x="620.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fwalk.c (aside)</title></rect>
+<rect x="631.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>lconv.c (aside)</title></rect>
+<rect x="642.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>putc.c (aside)</title></rect>
+<rect x="653.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fake (aside)</title></rect>
+<rect x="664.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ungetc.c (aside)</title></rect>
+<rect x="675.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fgetc.c (aside)</title></rect>
+<rect x="686.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>atof.c (aside)</title></rect>
+<rect x="697.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>atold.c (aside)</title></rect>
+<rect x="708.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>frlist.c (aside)</title></rect>
+<rect x="720.00" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fexistp.c (aside)</title></rect>
+<rect x="731.11" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_creat.c (aside)</title></rect>
+<rect x="742.22" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>_chmod.c (aside)</title></rect>
+<rect x="753.33" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>putpath.c (aside)</title></rect>
+<rect x="764.44" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fixpath.c (aside)</title></rect>
+<rect x="775.56" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>crlf2nl.c (aside)</title></rect>
+<rect x="786.67" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>ctime.c (aside)</title></rect>
+<rect x="797.78" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>gettimeo.c (aside)</title></rect>
+<rect x="808.89" y="193.33" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strstr.c (aside)</title></rect>
+<rect x="20.00" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fse_open.c (aside)</title></rect>
+<rect x="31.11" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>glob.c (aside)</title></rect>
+<rect x="42.22" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strtod.c (aside)</title></rect>
+<rect x="53.33" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strtold.c (aside)</title></rect>
+<rect x="64.44" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdprn.c (aside)</title></rect>
+<rect x="75.56" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>stdaux.c (aside)</title></rect>
+<rect x="86.67" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fncase.c (aside)</title></rect>
+<rect x="97.78" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>lfnshort.c (aside)</title></rect>
+<rect x="108.89" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>strrchr.c (aside)</title></rect>
+<rect x="120.00" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>fnmatch.c (aside)</title></rect>
+<rect x="131.11" y="204.44" width="11.11" height="11.11" fill="#b94a53" stroke="#0f172a" stroke-width="1"><title>qsort.c (aside)</title></rect>
+</svg>
